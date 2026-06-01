@@ -5,6 +5,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { HealthModule } from './health/health.module';
 import { PrismaModule } from './infra/prisma/prisma.module';
+import { TenantModule } from './tenant/tenant.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { PrismaModule } from './infra/prisma/prisma.module';
     EventEmitterModule.forRoot(),
     HealthModule,
     PrismaModule,
+    TenantModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
