@@ -2,6 +2,7 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect, useState, useRef } from 'react'
 import { useAuth } from '../lib/auth-context'
 import { Upload, Copy, Trash2, Loader2, ImageIcon } from 'lucide-react'
+import { api } from '../lib/api-client'
 import { uploadImagem } from '../services/upload.service'
 import type { TenantUser } from '../types'
 
@@ -17,18 +18,11 @@ interface GaleriaImage {
 }
 
 async function listarGaleria(tenantId: string): Promise<GaleriaImage[]> {
-  const res = await fetch(`/api/tenants/${tenantId}/galeria`, { credentials: 'include' })
-  if (!res.ok) throw new Error('Failed to load gallery')
-  return res.json()
+  return api.get(`/tenants/${tenantId}/galeria`)
 }
 
 async function excluirImagem(tenantId: string, filename: string): Promise<void> {
-  const res = await fetch(`/api/tenants/${tenantId}/uploads/${filename}`, {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-  })
-  if (!res.ok) throw new Error('Failed to delete image')
+  return api.delete(`/tenants/${tenantId}/uploads/${filename}`)
 }
 
 function GaleriaPage() {

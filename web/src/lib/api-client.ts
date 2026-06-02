@@ -2,7 +2,7 @@ const BASE_URL = '/api'
 
 let csrfToken: string | null = null
 
-async function obtainCsrf(): Promise<string> {
+export async function obtainCsrf(): Promise<string> {
   if (csrfToken) return csrfToken
   const res = await fetch(`${BASE_URL}/auth/csrf`, { credentials: 'include' })
   if (!res.ok) {
