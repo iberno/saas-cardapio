@@ -9,6 +9,7 @@ import { TenantModule } from './tenant/tenant.module';
 import { PlatformAuthModule } from './auth/platform/platform-auth.module';
 import { TenantUserAuthModule } from './auth/tenant-user/tenant-user-auth.module';
 import { CustomerAuthModule } from './auth/customer/customer-auth.module';
+import { PlatformAdminModule } from './platform-admin/platform-admin.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CustomerAuthModule } from './auth/customer/customer-auth.module';
     PlatformAuthModule,
     TenantUserAuthModule,
     CustomerAuthModule,
+    PlatformAdminModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
