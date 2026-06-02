@@ -1,17 +1,29 @@
+export type TenantStatus = 'TRIAL' | 'ACTIVE' | 'SUSPENDED' | 'CANCELED'
+
 export interface Tenant {
   id: string
+  slug: string
   name: string
-  subdomain: string
-  status: 'ACTIVE' | 'SUSPENDED' | 'DISABLED'
+  status: TenantStatus
+  contactEmail: string
+  contactPhone?: string | null
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
 }
 
 export interface CreateTenantRequest {
+  slug: string
   name: string
-  subdomain: string
+  contactEmail: string
+  contactPhone?: string
+}
+
+export interface UpdateTenantRequest {
+  name?: string
+  contactEmail?: string
+  contactPhone?: string
 }
 
 export interface UpdateTenantStatusRequest {
-  status: 'ACTIVE' | 'SUSPENDED' | 'DISABLED'
+  status: TenantStatus
 }

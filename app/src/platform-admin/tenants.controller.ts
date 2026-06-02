@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { TenantsService } from './tenants.service';
 import { PlatformAuthGuard } from '../common/guards/platform-auth.guard';
 import { CreateTenantDto } from './dto/create-tenant.dto';
+import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { UpdateTenantStatusDto } from './dto/update-tenant-status.dto';
 import { TenantStatus } from '@prisma/client';
 
@@ -28,6 +29,16 @@ export class TenantsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateTenantDto) {
+    return this.service.update(id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.service.remove(id);
   }
 
   @Post(':id/status')
