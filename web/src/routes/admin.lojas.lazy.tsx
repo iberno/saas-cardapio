@@ -24,9 +24,12 @@ function LojasPage() {
 
   const createRef = useRef<HTMLDialogElement>(null)
   const editRef = useRef<HTMLDialogElement>(null)
+  const confirmRef = useRef<HTMLDialogElement>(null)
   const [form, setForm] = useState<CreateTenantRequest>({ slug: '', name: '', contactEmail: '' })
   const [editId, setEditId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<UpdateTenantRequest>({})
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => {})
+  const [confirmMessage, setConfirmMessage] = useState('')
 
   const load = () => {
     setLoading(true)
@@ -65,16 +68,26 @@ function LojasPage() {
     load()
   }
 
-  const handleDelete = async (t: Tenant) => {
-    if (!confirm(`Excluir a loja "${t.name}"? Esta ação não pode ser desfeita.`)) return
-    await excluirTenant(t.id)
-    load()
+  const confirmAndExecute = (message: string, action: () => void) => {
+    setConfirmMessage(message)
+    setConfirmAction(() => action)
+    confirmRef.current?.showModal()
   }
 
-  const toggleStatus = async (t: Tenant) => {
+  const handleDelete = (t: Tenant) => {
+    confirmAndExecute(
+      `Excluir a loja "${t.name}"? Esta ação não pode ser desfeita.`,
+      async () => { await excluirTenant(t.id); load() },
+    )
+  }
+
+  const toggleStatus = (t: Tenant) => {
     const next = t.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE'
-    await atualizarStatusTenant(t.id, { status: next })
-    load()
+    const label = next === 'SUSPENDED' ? 'Suspender' : 'Ativar'
+    confirmAndExecute(
+      `${label} a loja "${t.name}"?`,
+      async () => { await atualizarStatusTenant(t.id, { status: next }); load() },
+    )
   }
 
   if (loading) return <span className="loading loading-spinner loading-lg" />
@@ -119,6 +132,16 @@ function LojasPage() {
           </div>
           <div className="modal-action">
             <button className="btn btn-primary" onClick={handleCreate}>Criar</button>
+            <form method="dialog"><button className="btn">Cancelar</button></form>
+          </div>
+        </div>
+      </dialog>
+
+      <dialog ref={confirmRef} className="modal">
+        <div className="modal-box">
+          <p className="py-4">{confirmMessage}</p>
+          <div className="modal-action">
+            <button className="btn btn-error" onClick={async () => { await confirmAction(); confirmRef.current?.close() }}>Confirmar</button>
             <form method="dialog"><button className="btn">Cancelar</button></form>
           </div>
         </div>
