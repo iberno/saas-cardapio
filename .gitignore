@@ -11,3 +11,4 @@ coverage/
 routeTree.gen.ts
 .tanstack/
 
+.superpowers/
