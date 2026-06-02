@@ -7,9 +7,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UploadModule } from './upload/upload.module';
 import { TenantModule } from '../tenant/tenant.module';
 import { CategoriasModule } from './categorias/categorias.module';
+import { VariantesModule } from './variantes/variantes.module';
+import { GruposModule } from './grupos/grupos.module';
+import { BannersModule } from './banners/banners.module';
 
 @Module({
-  imports: [UploadModule, TenantModule, CategoriasModule],
+  imports: [UploadModule, TenantModule, CategoriasModule, VariantesModule, GruposModule, BannersModule],
   controllers: [CardapioController, PublicCardapioController],
   providers: [CardapioService, TokenService, JwtService],
 })
