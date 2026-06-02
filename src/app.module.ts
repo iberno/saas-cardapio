@@ -8,6 +8,7 @@ import { PrismaModule } from './infra/prisma/prisma.module';
 import { TenantModule } from './tenant/tenant.module';
 import { PlatformAuthModule } from './auth/platform/platform-auth.module';
 import { TenantUserAuthModule } from './auth/tenant-user/tenant-user-auth.module';
+import { CustomerAuthModule } from './auth/customer/customer-auth.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TenantUserAuthModule } from './auth/tenant-user/tenant-user-auth.module
     TenantModule,
     PlatformAuthModule,
     TenantUserAuthModule,
+    CustomerAuthModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

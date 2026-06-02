@@ -8,9 +8,18 @@ function injectTenantId(args: any, tenantId: string, operation: string) {
   if (['create', 'createMany'].includes(operation)) {
     return injectTenantIdCreate(args, tenantId, operation);
   }
-  if (args.where?.tenantId) return args;
+  if (hasTenantIdInWhere(args.where)) return args;
   args.where = { ...args.where, tenantId };
   return args;
+}
+
+function hasTenantIdInWhere(where: any): boolean {
+  if (!where) return false;
+  if (where.tenantId) return true;
+  for (const key of Object.keys(where)) {
+    if (typeof where[key] === 'object' && where[key]?.tenantId) return true;
+  }
+  return false;
 }
 
 function injectTenantIdCreate(args: any, tenantId: string, operation: string) {
