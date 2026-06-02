@@ -39,6 +39,19 @@ async function request<T>(
   })
 
   if (!res.ok) {
+    if (res.status === 403 && method !== 'GET' && method !== 'HEAD') {
+      csrfToken = null
+      headers['X-CSRF-Token'] = await obtainCsrf()
+      const retry = await fetch(`${BASE_URL}${path}`, {
+        method, headers, credentials: 'include',
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      })
+      if (retry.ok) {
+        return retry.status === 204 ? undefined as T : retry.json()
+      }
+      const err2 = await retry.json().catch(() => ({ message: retry.statusText }))
+      throw new ApiError(retry.status, err2.message || 'Request failed')
+    }
     const error = await res.json().catch(() => ({ message: res.statusText }))
     throw new ApiError(res.status, error.message || 'Request failed')
   }

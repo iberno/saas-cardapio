@@ -20,6 +20,7 @@ function CardapioPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
+  const [error, setError] = useState('')
   const [form, setForm] = useState<CreateProdutoRequest>({
     nome: '', descricao: '', preco: 0, categoria: 'BEBIDAS',
   })
@@ -49,13 +50,18 @@ function CardapioPage() {
 
   const handleSave = async () => {
     if (!tenantId) return
-    if (editId) {
-      await atualizarProduto(tenantId, editId, form as UpdateProdutoRequest)
-    } else {
-      await criarProduto(tenantId, form)
+    setError('')
+    try {
+      if (editId) {
+        await atualizarProduto(tenantId, editId, form as UpdateProdutoRequest)
+      } else {
+        await criarProduto(tenantId, form)
+      }
+      resetForm()
+      load()
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao salvar')
     }
-    resetForm()
-    load()
   }
 
   const handleDelete = async (id: string) => {
