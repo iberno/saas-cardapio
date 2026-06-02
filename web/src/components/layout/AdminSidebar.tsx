@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Cardápio',
-    path: '/admin/loja',
+    path: '/admin/loja/cardapio',
     icon: ClipboardList,
     showFor: 'tenant',
   },
