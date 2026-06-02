@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { LoggerModule } from 'nestjs-pino';
 import { HealthModule } from './health/health.module';
 import { PrismaModule } from './infra/prisma/prisma.module';
 import { TenantModule } from './tenant/tenant.module';
@@ -16,6 +17,13 @@ import { PlatformAdminModule } from './platform-admin/platform-admin.module';
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
     EventEmitterModule.forRoot(),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        redact: ['req.headers.cookie', 'req.headers.authorization', 'password', 'passwordHash', 'token', 'totpSecret'],
+        level: process.env.LOG_LEVEL || 'info',
+        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
+      },
+    }),
     HealthModule,
     PrismaModule,
     TenantModule,
