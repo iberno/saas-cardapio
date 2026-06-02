@@ -1,11 +1,14 @@
-import { StrictMode } from 'react'
+import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { AuthProvider } from './lib/auth-context'
+import { AuthProvider, useAuth } from './lib/auth-context'
 import { routeTree } from './routeTree.gen'
 import './index.css'
 
-const router = createRouter({ routeTree })
+const router = createRouter({
+  routeTree,
+  context: { isAuthenticated: false, authLoading: true },
+})
 
 declare module '@tanstack/react-router' {
   interface Register {
@@ -13,10 +16,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+function RouterWithAuth() {
+  const { user, loading } = useAuth()
+
+  useEffect(() => {
+    router.update({
+      context: { isAuthenticated: !!user, authLoading: loading },
+    })
+  }, [user, loading])
+
+  return <RouterProvider router={router} />
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <RouterWithAuth />
     </AuthProvider>
   </StrictMode>,
 )

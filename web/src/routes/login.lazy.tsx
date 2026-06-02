@@ -5,12 +5,16 @@ import { Card, Input, Button } from '../components/ui'
 import { LogIn } from 'lucide-react'
 
 export const Route = createLazyFileRoute('/login')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: (search.redirect as string) || undefined,
+  }),
   component: LoginPage,
 })
 
 function LoginPage() {
   const { login, user, isPlatform } = useAuth()
   const navigate = useNavigate()
+  const { redirect: redirectUrl } = Route.useSearch()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [slug, setSlug] = useState('')
@@ -20,8 +24,8 @@ function LoginPage() {
 
   useEffect(() => {
     if (!user) return
-    navigate({ to: isPlatform ? '/admin' : '/admin/loja' })
-  }, [user, navigate, isPlatform])
+    navigate({ to: redirectUrl || (isPlatform ? '/admin' : '/admin/loja') })
+  }, [user, navigate, isPlatform, redirectUrl])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
