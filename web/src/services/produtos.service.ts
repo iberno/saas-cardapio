@@ -4,14 +4,12 @@ import type {
   CreateProdutoRequest,
   UpdateProdutoRequest,
   PageResponse,
-  Categoria,
   Ordenacao,
 } from '../types'
 
 interface ListarParams {
   page?: number
   limit?: number
-  categoria?: Categoria
   ordenacao?: Ordenacao
 }
 

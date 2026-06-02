@@ -1,13 +1,15 @@
-export type Categoria = 'BEBIDAS' | 'ENTRADAS' | 'PRATOS' | 'SOBREMESAS'
+import type { Categoria } from './categoria'
 
-export const CATEGORIAS: Categoria[] = [
+export type CategoriaEnum = 'BEBIDAS' | 'ENTRADAS' | 'PRATOS' | 'SOBREMESAS'
+
+export const CATEGORIAS: CategoriaEnum[] = [
   'BEBIDAS',
   'ENTRADAS',
   'PRATOS',
   'SOBREMESAS',
 ]
 
-export const CATEGORIA_LABEL: Record<Categoria, string> = {
+export const CATEGORIA_LABEL: Record<CategoriaEnum, string> = {
   BEBIDAS: 'Bebidas',
   ENTRADAS: 'Entradas',
   PRATOS: 'Pratos',
@@ -19,7 +21,10 @@ export interface Produto {
   nome: string
   descricao: string | null
   preco: number
-  categoria: Categoria
+  categoria: CategoriaEnum
+  categoriaId: string | null
+  categoriaCardapio: Categoria | null
+  exibirPrecoAPartirDe: boolean
   disponivel: boolean
   destaque: boolean
   imagemUrl: string | null
@@ -31,8 +36,9 @@ export interface Produto {
 export interface CreateProdutoRequest {
   nome: string
   descricao?: string
-  preco: number
-  categoria: Categoria
+  preco?: number
+  categoria?: CategoriaEnum
+  categoriaId?: string
   disponivel?: boolean
   destaque?: boolean
   imagemUrl?: string
@@ -42,7 +48,8 @@ export interface UpdateProdutoRequest {
   nome?: string
   descricao?: string
   preco?: number
-  categoria?: Categoria
+  categoria?: CategoriaEnum
+  categoriaId?: string
   disponivel?: boolean
   destaque?: boolean
   imagemUrl?: string

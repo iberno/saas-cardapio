@@ -1,6 +1,6 @@
 export type { LoginRequest, PlatformUser, TenantUser, Customer } from './auth'
 export type { Tenant, CreateTenantRequest, UpdateTenantStatusRequest } from './tenant'
-export type { Produto, CreateProdutoRequest, UpdateProdutoRequest, PageResponse, Categoria, Ordenacao } from './cardapio'
+export type { Produto, CreateProdutoRequest, UpdateProdutoRequest, PageResponse, CategoriaEnum, Ordenacao } from './cardapio'
 export { CATEGORIAS, CATEGORIA_LABEL } from './cardapio'
 export type { StoreTheme } from './theme'
 export type { Categoria, CreateCategoriaRequest, UpdateCategoriaRequest } from './categoria'
