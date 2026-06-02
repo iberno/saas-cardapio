@@ -26,6 +26,7 @@ function LojasPage() {
   const editRef = useRef<HTMLDialogElement>(null)
   const confirmRef = useRef<HTMLDialogElement>(null)
   const [form, setForm] = useState<CreateTenantRequest>({ slug: '', name: '', contactEmail: '' })
+  const [createdInfo, setCreatedInfo] = useState<string | null>(null)
   const [editId, setEditId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<UpdateTenantRequest>({})
   const [confirmAction, setConfirmAction] = useState<() => void>(() => {})
@@ -46,12 +47,16 @@ function LojasPage() {
 
   const openCreate = () => {
     setForm({ slug: '', name: '', contactEmail: '' })
+    setCreatedInfo(null)
     createRef.current?.showModal()
   }
 
   const handleCreate = async () => {
-    await criarTenant(form)
+    const res = await criarTenant(form)
     createRef.current?.close()
+    if (res.ownerEmail) {
+      setCreatedInfo(`Loja criada! Email do proprietário: ${res.ownerEmail}`)
+    }
     load()
   }
 
@@ -101,6 +106,13 @@ function LojasPage() {
         </button>
       </div>
 
+      {createdInfo && (
+        <div className="alert alert-success shadow-lg">
+          <span>{createdInfo}</span>
+          <button className="btn btn-sm btn-ghost" onClick={() => setCreatedInfo(null)}><X size={16} /></button>
+        </div>
+      )}
+
       <label className="input input-bordered flex items-center gap-2 w-full max-w-sm">
         <Search size={16} className="opacity-60" />
         <input className="grow" placeholder="Buscar por nome ou slug..." value={filter} onChange={(e) => { setFilter(e.target.value); setPage(0) }} />
@@ -128,6 +140,16 @@ function LojasPage() {
               <legend className="fieldset-legend">Email de contato</legend>
               <input className="input w-full" type="email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
                 placeholder="contato@acucaretal.com" />
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Email do proprietário</legend>
+              <input className="input w-full" type="email" value={form.ownerEmail || ''} onChange={(e) => setForm({ ...form, ownerEmail: e.target.value })}
+                placeholder="dono@acucaretal.com" />
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Senha do proprietário</legend>
+              <input className="input w-full" type="password" value={form.ownerPassword || ''} onChange={(e) => setForm({ ...form, ownerPassword: e.target.value })}
+                placeholder="••••••••" />
             </fieldset>
           </div>
           <div className="modal-action">

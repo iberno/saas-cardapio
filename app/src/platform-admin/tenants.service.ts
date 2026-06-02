@@ -3,13 +3,33 @@ import { PrismaService } from '../infra/prisma/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { TenantStatus } from '@prisma/client';
+import { hashPassword } from '../auth/shared/auth-utils';
 
 @Injectable()
 export class TenantsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateTenantDto) {
-    return this.prisma.platform().tenant.create({ data: dto });
+    const { ownerEmail, ownerPassword, ...tenantData } = dto;
+    const tenant = await this.prisma.platform().tenant.create({ data: tenantData });
+
+    if (ownerEmail && ownerPassword) {
+      const passwordHash = await hashPassword(ownerPassword);
+      await this.prisma.platform().tenantUser.create({
+        data: {
+          tenantId: tenant.id,
+          email: ownerEmail,
+          passwordHash,
+          name: 'Proprietário',
+          role: 'OWNER',
+        },
+      });
+    }
+
+    return {
+      ...tenant,
+      ownerEmail: ownerEmail || undefined,
+    };
   }
 
   async findAll() {

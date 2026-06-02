@@ -7,6 +7,7 @@ export interface Tenant {
   status: TenantStatus
   contactEmail: string
   contactPhone?: string | null
+  ownerEmail?: string | null
   createdAt: string
   updatedAt?: string
 }
@@ -16,6 +17,8 @@ export interface CreateTenantRequest {
   name: string
   contactEmail: string
   contactPhone?: string
+  ownerEmail?: string
+  ownerPassword?: string
 }
 
 export interface UpdateTenantRequest {
