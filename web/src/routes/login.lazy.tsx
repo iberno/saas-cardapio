@@ -44,41 +44,13 @@ function LoginPage() {
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-2">
-            <button
-              type="button"
-              className={`btn btn-sm flex-1 ${type === 'platform' ? 'btn-primary' : 'btn-ghost'}`}
-              onClick={() => setType('platform')}
-            >
-              Plataforma
-            </button>
-            <button
-              type="button"
-              className={`btn btn-sm flex-1 ${type === 'tenant' ? 'btn-primary' : 'btn-ghost'}`}
-              onClick={() => setType('tenant')}
-            >
-              Loja
-            </button>
+            <button type="button" className={`btn btn-sm flex-1 ${type === 'platform' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setType('platform')}>Plataforma</button>
+            <button type="button" className={`btn btn-sm flex-1 ${type === 'tenant' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setType('tenant')}>Loja</button>
           </div>
-          <Input
-            label="Email"
-            type="email"
-            placeholder="seu@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            label="Senha"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <Input label="Email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input label="Senha" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
           {error && <p className="text-error text-sm">{error}</p>}
-          <Button type="submit" loading={loading} icon={LogIn} className="w-full">
-            Entrar
-          </Button>
+          <Button type="submit" loading={loading} icon={LogIn} className="w-full">Entrar</Button>
         </form>
       </Card>
     </div>

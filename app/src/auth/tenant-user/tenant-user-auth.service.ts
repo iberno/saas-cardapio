@@ -80,10 +80,10 @@ export class TenantUserAuthService {
     });
   }
 
-  async me(userId: string) {
-    return this.prisma.scoped.tenantUser.findUnique({
-      where: { id: userId },
-      select: { id: true, email: true, name: true, role: true, totpEnabled: true, createdAt: true },
+  async me(userId: string, tenantId: string) {
+    return this.prisma.tenantUser.findUnique({
+      where: { id: userId, tenantId },
+      select: { id: true, email: true, name: true, role: true, totpEnabled: true, tenantId: true, createdAt: true },
     });
   }
 

@@ -1,5 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../lib/auth-context'
+import { listarProdutos } from '../services/produtos.service'
 import { Card } from '../components/ui'
 import { Package } from 'lucide-react'
 import type { TenantUser } from '../types'
@@ -10,6 +12,15 @@ export const Route = createLazyFileRoute('/admin/loja/')({
 
 function StoreDashboard() {
   const { user } = useAuth()
+  const tenantId = user && 'tenantId' in user ? (user as TenantUser).tenantId : ''
+  const [totalProdutos, setTotalProdutos] = useState<number>(0)
+
+  useEffect(() => {
+    if (!tenantId) return
+    listarProdutos(tenantId, { limit: 1 })
+      .then((res) => setTotalProdutos(res.total))
+      .catch(() => {})
+  }, [tenantId])
 
   return (
     <div className="space-y-6">
@@ -22,7 +33,7 @@ function StoreDashboard() {
           <div className="flex items-center gap-3">
             <Package className="text-accent" size={24} />
             <div>
-              <p className="text-2xl font-bold text-white">0</p>
+              <p className="text-2xl font-bold text-white">{totalProdutos}</p>
               <p className="text-sm text-white/60">Produtos</p>
             </div>
           </div>

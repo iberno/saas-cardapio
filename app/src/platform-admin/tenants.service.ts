@@ -31,4 +31,13 @@ export class TenantsService {
       data: { status },
     });
   }
+
+  async getStats() {
+    const [totalTenants, activeTenants, totalProdutos] = await Promise.all([
+      this.prisma.platform().tenant.count(),
+      this.prisma.platform().tenant.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.platform().produto.count(),
+    ]);
+    return { totalTenants, activeTenants, totalProdutos };
+  }
 }

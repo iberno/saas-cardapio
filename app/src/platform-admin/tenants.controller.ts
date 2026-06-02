@@ -15,6 +15,11 @@ export class TenantsController {
     return this.service.create(dto);
   }
 
+  @Get('stats')
+  stats() {
+    return this.service.getStats();
+  }
+
   @Get()
   findAll() {
     return this.service.findAll();

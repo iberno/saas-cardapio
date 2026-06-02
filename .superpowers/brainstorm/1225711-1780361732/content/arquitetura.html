@@ -1,0 +1,90 @@
+<h2>Arquitetura do Frontend</h2>
+<p class="subtitle">Vite + React SPA — TanStack Router — DaisyUI Business</p>
+
+<div class="section">
+  <h3>Estrutura de Pastas proposta</h3>
+  <div class="mockup" style="text-align:left; font-family:monospace; white-space:pre; line-height:1.6; font-size:0.9rem">
+web/
+├── index.html
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+├── tailwind.config.ts
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx
+│   ├── routes/           ← TanStack Router
+│   │   ├── __root.tsx
+│   │   ├── index.lazy.tsx       (landing)
+│   │   ├── login.lazy.tsx
+│   │   ├── admin/
+│   │   │   ├── route.ts
+│   │   │   ├── index.lazy.tsx   (dashboard plataforma)
+│   │   │   └── lojas.lazy.tsx   (CRUD lojas)
+│   │   └── loja/
+│   │       ├── route.ts
+│   │       ├── index.lazy.tsx   (dashboard loja)
+│   │       └── cardapio.lazy.tsx (gerir cardápio)
+│   ├── components/       ← Componentes reutilizáveis
+│   │   ├── ui/           (Button, Card, Input, Modal…)
+│   │   ├── layout/       (Header, Sidebar, Footer)
+│   │   └── landing/      (Hero, Features, Pricing)
+│   ├── lib/              (api client, hooks, utils)
+│   └── types/            (TypeScript types)
+  </div>
+</div>
+
+<div class="section">
+  <h3>Rotas (TanStack Router)</h3>
+  <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem">
+    <tr style="border-bottom:1px solid #444">
+      <th style="padding:6px 8px; font-weight:600">Rota</th>
+      <th style="padding:6px 8px; font-weight:600">Página</th>
+      <th style="padding:6px 8px; font-weight:600">Auth</th>
+    </tr>
+    <tr style="border-bottom:1px solid #333">
+      <td style="padding:6px 8px"><code>/</code></td>
+      <td style="padding:6px 8px">Landing Page</td>
+      <td style="padding:6px 8px">❌</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333">
+      <td style="padding:6px 8px"><code>/login</code></td>
+      <td style="padding:6px 8px">Login (plataforma ou loja)</td>
+      <td style="padding:6px 8px">❌</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333">
+      <td style="padding:6px 8px"><code>/admin</code></td>
+      <td style="padding:6px 8px">Dashboard Plataforma</td>
+      <td style="padding:6px 8px">✅</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333">
+      <td style="padding:6px 8px"><code>/admin/lojas</code></td>
+      <td style="padding:6px 8px">CRUD Lojas (Tenants)</td>
+      <td style="padding:6px 8px">✅</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333">
+      <td style="padding:6px 8px"><code>/admin/loja/:id</code></td>
+      <td style="padding:6px 8px">Editar Loja</td>
+      <td style="padding:6px 8px">✅</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333">
+      <td style="padding:6px 8px"><code>/loja/:slug</code></td>
+      <td style="padding:6px 8px">Dashboard da Loja</td>
+      <td style="padding:6px 8px">✅</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333">
+      <td style="padding:6px 8px"><code>/loja/:slug/cardapio</code></td>
+      <td style="padding:6px 8px">Gerenciar Cardápio</td>
+      <td style="padding:6px 8px">✅</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Layouts</h3>
+  <p>Dois layouts principais:</p>
+  <ul>
+    <li><strong>Público</strong> — landing, login (Header + Footer, sem sidebar)</li>
+    <li><strong>Admin</strong> — plataforma e loja (Sidebar + Topbar + Content)</li>
+  </ul>
+</div>

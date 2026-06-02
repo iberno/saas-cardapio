@@ -14,6 +14,13 @@ enum TenantStatus {
   CANCELED
 }
 
+enum Categoria {
+  BEBIDAS
+  ENTRADAS
+  PRATOS
+  SOBREMESAS
+}
+
 model Tenant {
   id           String       @id @default(uuid()) @db.Uuid
   slug         String       @unique
@@ -28,6 +35,7 @@ model Tenant {
 
   tenantUsers TenantUser[]
   customers   Customer[]
+  produtos    Produto[]
 
   @@index([status])
   @@map("tenants")
@@ -91,6 +99,26 @@ model Customer {
   @@unique([tenantId, phone])
   @@index([tenantId])
   @@map("customers")
+}
+
+model Produto {
+  id         String    @id @default(uuid()) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  nome       String
+  descricao  String?
+  preco      Decimal   @db.Decimal(10, 2)
+  categoria  Categoria
+  disponivel Boolean   @default(true)
+  destaque   Boolean   @default(false)
+  imagemUrl  String?   @map("imagem_url")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, categoria])
+  @@map("produtos")
 }
 
 enum UserType {

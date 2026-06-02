@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { doubleCsrf } from 'csrf-csrf';
 import { TraceIdInterceptor } from './common/interceptors/trace-id.interceptor';
+import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -47,6 +48,7 @@ async function bootstrap() {
     res.json({ csrfToken: token });
   });
 
+  app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(new TraceIdInterceptor());
 
   await app.listen(process.env.PORT || 3001);

@@ -1,0 +1,19 @@
+{"type":"server-started","port":63331,"host":"0.0.0.0","url_host":"localhost","url":"http://localhost:63331","screen_dir":"/home/iberno/Projetos/saas-cardapio/.superpowers/brainstorm/1225711-1780361732/content","state_dir":"/home/iberno/Projetos/saas-cardapio/.superpowers/brainstorm/1225711-1780361732/state"}
+{"type":"server-stopped","reason":"idle timeout"}
+node:fs:2414
+    return binding.writeFileUtf8(
+                   ^
+
+Error: ENOENT: no such file or directory, open '/home/iberno/Projetos/saas-cardapio/.superpowers/brainstorm/1225711-1780361732/state/server-stopped'
+    at Object.writeFileSync (node:fs:2414:20)
+    at shutdown (/home/iberno/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills/brainstorming/scripts/server.cjs:305:8)
+    at Timeout._onTimeout (/home/iberno/.cache/opencode/packages/superpowers@git+https:/github.com/obra/superpowers.git/node_modules/superpowers/skills/brainstorming/scripts/server.cjs:322:59)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/home/iberno/Projetos/saas-cardapio/.superpowers/brainstorm/1225711-1780361732/state/server-stopped'
+}
+
+Node.js v24.15.0

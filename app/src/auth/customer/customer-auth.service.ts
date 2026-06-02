@@ -37,9 +37,9 @@ export class CustomerAuthService {
     return { accessToken, refreshToken, customer };
   }
 
-  async me(customerId: string) {
-    return this.prisma.scoped.customer.findUnique({
-      where: { id: customerId },
+  async me(customerId: string, tenantId: string) {
+    return this.prisma.customer.findUnique({
+      where: { id: customerId, tenantId },
       select: { id: true, phone: true, name: true, points: true, createdAt: true },
     });
   }

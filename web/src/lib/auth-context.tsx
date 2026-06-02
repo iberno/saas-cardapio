@@ -16,7 +16,7 @@ interface AuthContextValue {
   loading: boolean
   isPlatform: boolean
   login: (email: string, password: string, type: 'platform' | 'tenant') => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -24,74 +24,53 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(null)
   const [loading, setLoading] = useState(true)
-  const [authType, setAuthType] = useState<'platform' | 'tenant' | null>(() =>
-    localStorage.getItem('auth_type') as 'platform' | 'tenant' | null,
-  )
+  const [authType, setAuthType] = useState<'platform' | 'tenant' | null>(null)
 
   const fetchUser = useCallback(async () => {
-    const token = localStorage.getItem('auth_token')
-    if (!token) {
-      setLoading(false)
-      return
-    }
     try {
-      const storedType = localStorage.getItem('auth_type')
-      const endpoint =
-        storedType === 'platform'
-          ? '/auth/platform/me'
-          : '/auth/tenant-user/me'
-      const data = await api.get<User>(endpoint)
+      const data = await api.get<User>('/platform/auth/me')
       setUser(data)
-      setAuthType(storedType as 'platform' | 'tenant' | null)
+      setAuthType('platform')
     } catch {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('auth_type')
-      setAuthType(null)
+      try {
+        const data = await api.get<User>('/tenant/auth/me')
+        setUser(data)
+        setAuthType('tenant')
+      } catch {
+        setUser(null)
+        setAuthType(null)
+      }
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => {
-    fetchUser()
-  }, [fetchUser])
+  useEffect(() => { fetchUser() }, [fetchUser])
 
   const login = useCallback(
     async (email: string, password: string, type: 'platform' | 'tenant') => {
-      const endpoint =
-        type === 'platform'
-          ? '/auth/platform/login'
-          : '/auth/tenant-user/login'
-      const { access_token } = await api.post<{ access_token: string }>(
-        endpoint,
-        { email, password },
-      )
-      localStorage.setItem('auth_token', access_token)
-      localStorage.setItem('auth_type', type)
-      setAuthType(type)
+      const endpoint = type === 'platform' ? '/platform/auth/login' : '/tenant/auth/login'
+      await api.post<{ message: string }>(endpoint, { email, password })
       await fetchUser()
     },
     [fetchUser],
   )
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      if (authType === 'platform') {
+        await api.post('/platform/auth/logout')
+      } else {
+        await api.post('/tenant/auth/logout')
+      }
+    } catch {}
     setUser(null)
     setAuthType(null)
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_type')
     window.location.href = '/login'
-  }, [])
+  }, [authType])
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        isPlatform: authType === 'platform',
-        login,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, loading, isPlatform: authType === 'platform', login, logout }}>
       {children}
     </AuthContext.Provider>
   )

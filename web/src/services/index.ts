@@ -1,8 +1,3 @@
-export {
-  loginPlatform,
-  loginTenantUser,
-  getPlatformMe,
-  getTenantUserMe,
-} from './auth.service'
+export { loginPlatform, loginTenantUser, logoutPlatform, logoutTenantUser } from './auth.service'
 export { listarProdutos, criarProduto, atualizarProduto, excluirProduto } from './produtos.service'
 export { listarTenants, criarTenant, atualizarStatusTenant } from './tenants.service'

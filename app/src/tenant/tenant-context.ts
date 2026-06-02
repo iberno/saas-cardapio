@@ -2,13 +2,15 @@ import { AsyncLocalStorage } from 'async_hooks';
 
 export interface TenantContextData {
   tenantId: string;
-  slug: string;
+  slug?: string;
 }
 
 const als = new AsyncLocalStorage<TenantContextData>();
 
 export const TenantContext = {
   run: (data: TenantContextData, fn: () => any) => als.run(data, fn),
+
+  set: (data: TenantContextData) => als.enterWith(data),
 
   get: (): TenantContextData | undefined => als.getStore(),
 

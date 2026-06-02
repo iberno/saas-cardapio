@@ -3,17 +3,10 @@ import type {
   Tenant,
   CreateTenantRequest,
   UpdateTenantStatusRequest,
-  PageResponse,
 } from '../types'
 
-export async function listarTenants(
-  params?: { page?: number; limit?: number },
-): Promise<PageResponse<Tenant>> {
-  const search = new URLSearchParams()
-  if (params?.page) search.set('page', String(params.page))
-  if (params?.limit) search.set('limit', String(params.limit))
-  const qs = search.toString()
-  return api.get(`/platform/tenants${qs ? `?${qs}` : ''}`)
+export async function listarTenants(): Promise<Tenant[]> {
+  return api.get<Tenant[]>('/platform/tenants')
 }
 
 export async function criarTenant(
@@ -26,5 +19,5 @@ export async function atualizarStatusTenant(
   id: string,
   data: UpdateTenantStatusRequest,
 ): Promise<Tenant> {
-  return api.patch<Tenant>(`/platform/tenants/${id}/status`, data)
+  return api.post<Tenant>(`/platform/tenants/${id}/status`, data)
 }

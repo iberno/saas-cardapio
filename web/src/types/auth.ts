@@ -1,33 +1,30 @@
-export interface LoginRequest {
-  email: string
-  password: string
-}
-
-export interface PlatformLoginRequest {
-  email: string
-  password: string
-}
-
-export interface AuthResponse {
-  access_token: string
-}
-
 export interface PlatformUser {
   id: string
   email: string
-  role: 'PLATFORM_ADMIN' | 'PLATFORM_VIEWER'
+  name: string
+  totpEnabled: boolean
+  createdAt: string
 }
 
 export interface TenantUser {
   id: string
   email: string
   name: string
-  role: 'ADMIN' | 'MANAGER' | 'STAFF'
+  role: 'OWNER' | 'STAFF'
+  totpEnabled: boolean
   tenantId: string
+  createdAt: string
 }
 
 export interface Customer {
   id: string
+  phone: string
+  name: string | null
+  points: number
+  createdAt: string
+}
+
+export interface LoginRequest {
   email: string
-  name: string
+  password: string
 }

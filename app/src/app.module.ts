@@ -11,6 +11,7 @@ import { PlatformAuthModule } from './auth/platform/platform-auth.module';
 import { TenantUserAuthModule } from './auth/tenant-user/tenant-user-auth.module';
 import { CustomerAuthModule } from './auth/customer/customer-auth.module';
 import { PlatformAdminModule } from './platform-admin/platform-admin.module';
+import { CardapioModule } from './cardapio/cardapio.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PlatformAdminModule } from './platform-admin/platform-admin.module';
     TenantUserAuthModule,
     CustomerAuthModule,
     PlatformAdminModule,
+    CardapioModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

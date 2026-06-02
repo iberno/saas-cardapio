@@ -1,7 +1,13 @@
 const BASE_URL = '/api'
 
-function getToken(): string | null {
-  return localStorage.getItem('auth_token')
+let csrfToken: string | null = null
+
+async function obtainCsrf(): Promise<string> {
+  if (csrfToken) return csrfToken
+  const res = await fetch(`${BASE_URL}/auth/csrf`, { credentials: 'include' })
+  const data = await res.json()
+  csrfToken = data.csrfToken
+  return csrfToken!
 }
 
 export class ApiError extends Error {
@@ -19,14 +25,16 @@ async function request<T>(
   path: string,
   body?: unknown,
 ): Promise<T> {
-  const headers: Record<string, string> = {}
-  const token = getToken()
-  if (token) headers['Authorization'] = `Bearer ${token}`
-  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (method !== 'GET' && method !== 'HEAD') {
+    const token = await obtainCsrf()
+    headers['X-CSRF-Token'] = token
+  }
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers,
+    credentials: 'include',
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
 

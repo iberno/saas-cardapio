@@ -1,24 +1,17 @@
 import { api } from '../lib/api-client'
-import type { AuthResponse, PlatformUser, TenantUser } from '../types'
 
-export async function loginPlatform(
-  email: string,
-  password: string,
-): Promise<AuthResponse> {
-  return api.post<AuthResponse>('/auth/platform/login', { email, password })
+export async function loginPlatform(email: string, password: string): Promise<void> {
+  await api.post('/platform/auth/login', { email, password })
 }
 
-export async function loginTenantUser(
-  email: string,
-  password: string,
-): Promise<AuthResponse> {
-  return api.post<AuthResponse>('/auth/tenant-user/login', { email, password })
+export async function loginTenantUser(email: string, password: string): Promise<void> {
+  await api.post('/tenant/auth/login', { email, password })
 }
 
-export async function getPlatformMe(): Promise<PlatformUser> {
-  return api.get<PlatformUser>('/auth/platform/me')
+export async function logoutPlatform(): Promise<void> {
+  await api.post('/platform/auth/logout')
 }
 
-export async function getTenantUserMe(): Promise<TenantUser> {
-  return api.get<TenantUser>('/auth/tenant-user/me')
+export async function logoutTenantUser(): Promise<void> {
+  await api.post('/tenant/auth/logout')
 }

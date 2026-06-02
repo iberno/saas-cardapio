@@ -26,7 +26,7 @@ export class CustomerAuthController {
   @UseGuards(CustomerAuthGuard)
   @Get('me')
   me(@CurrentUser() user: any) {
-    return this.service.me(user.sub);
+    return this.service.me(user.sub, user.tenantId);
   }
 }
 
