@@ -5,9 +5,15 @@ import { TenantContext } from '../../tenant/tenant-context';
 const TENANT_SCOPED_MODELS = new Set(['TenantUser', 'Customer']);
 
 function injectTenantId(args: any, tenantId: string, operation: string) {
-  if (['findUnique', 'findFirst', 'findMany', 'update', 'delete', 'upsert'].includes(operation)) {
-    args.where = { ...args.where, tenantId };
+  if (['create', 'createMany'].includes(operation)) {
+    return injectTenantIdCreate(args, tenantId, operation);
   }
+  if (args.where?.tenantId) return args;
+  args.where = { ...args.where, tenantId };
+  return args;
+}
+
+function injectTenantIdCreate(args: any, tenantId: string, operation: string) {
   if (operation === 'create') {
     args.data = { ...args.data, tenantId };
   }
@@ -52,12 +58,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
             if (TENANT_SCOPED_MODELS.has(model)) {
               const ctx = TenantContext.get();
               if (!ctx) throw new Error(`TenantContext required for ${model}.${operation}`);
-
-              await self.$executeRawUnsafe(
-                `SELECT set_config('app.current_tenant_id', $1, true)`,
-                ctx.tenantId,
-              );
-
               args = injectTenantId(args, ctx.tenantId, operation);
             }
             return query(args);

@@ -7,6 +7,7 @@ import { HealthModule } from './health/health.module';
 import { PrismaModule } from './infra/prisma/prisma.module';
 import { TenantModule } from './tenant/tenant.module';
 import { PlatformAuthModule } from './auth/platform/platform-auth.module';
+import { TenantUserAuthModule } from './auth/tenant-user/tenant-user-auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PlatformAuthModule } from './auth/platform/platform-auth.module';
     PrismaModule,
     TenantModule,
     PlatformAuthModule,
+    TenantUserAuthModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
