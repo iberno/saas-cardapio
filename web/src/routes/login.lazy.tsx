@@ -1,7 +1,6 @@
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../lib/auth-context'
-import { Card, Input, Button } from '../components/ui'
 import { LogIn } from 'lucide-react'
 
 export const Route = createLazyFileRoute('/login')({
@@ -42,25 +41,37 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+      <div className="rounded-xl border border-base-300 p-6 bg-base-100 w-full max-w-sm">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-white">Entrar</h1>
-          <p className="text-sm text-white/60 mt-1">Acesse sua conta</p>
+          <h1 className="text-2xl font-bold">Entrar</h1>
+          <p className="text-sm opacity-60 mt-1">Acesse sua conta</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-2">
             <button type="button" className={`btn btn-sm flex-1 ${type === 'platform' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setType('platform')}>Plataforma</button>
             <button type="button" className={`btn btn-sm flex-1 ${type === 'tenant' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setType('tenant')}>Loja</button>
           </div>
-          <Input label="Email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <Input label="Senha" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Email</legend>
+            <input className="input w-full" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </fieldset>
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Senha</legend>
+            <input className="input w-full" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </fieldset>
           {type === 'tenant' && (
-            <Input label="Loja (slug)" placeholder="ex: acai" value={slug} onChange={(e) => setSlug(e.target.value)} required />
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Loja (slug)</legend>
+              <input className="input w-full" placeholder="ex: acai" value={slug} onChange={(e) => setSlug(e.target.value)} required />
+            </fieldset>
           )}
           {error && <p className="text-error text-sm">{error}</p>}
-          <Button type="submit" loading={loading} icon={LogIn} className="w-full">Entrar</Button>
+          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+            {loading ? <span className="loading loading-spinner" /> : <LogIn size={16} />}
+            Entrar
+          </button>
         </form>
-      </Card>
+      </div>
     </div>
   )
 }

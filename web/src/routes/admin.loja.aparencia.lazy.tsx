@@ -2,7 +2,6 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../lib/auth-context'
 import { getTheme, updateTheme } from '../services/theme.service'
-import { Card, Button, Spinner } from '../components/ui'
 import { Save } from 'lucide-react'
 import type { StoreTheme, TenantUser } from '../types'
 
@@ -53,13 +52,13 @@ function AppearancePage() {
     setTheme((prev) => ({ ...prev, [key]: value }))
   }
 
-  if (loading) return <Spinner size="lg" />
+  if (loading) return <span className="loading loading-spinner loading-lg" />
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Aparência da Loja</h1>
 
-      <Card>
+      <div className="rounded-xl border border-base-300 p-6 bg-base-100">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {COLOR_FIELDS.map(({ key, label }) => (
             <div key={key}>
@@ -83,11 +82,14 @@ function AppearancePage() {
           ))}
         </div>
         <div className="mt-6">
-          <Button onClick={handleSave} loading={saving} icon={Save}>Salvar</Button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            {saving ? <span className="loading loading-spinner" /> : <Save size={16} />}
+            Salvar
+          </button>
         </div>
-      </Card>
+      </div>
 
-      <Card>
+      <div className="rounded-xl border border-base-300 p-6 bg-base-100">
         <h3 className="font-semibold mb-4">Pré-visualização</h3>
         <div
           className="rounded-xl p-6 space-y-3"
@@ -103,7 +105,7 @@ function AppearancePage() {
           </div>
           <p className="text-sm">Texto de exemplo com a cor <span style={{ color: theme.primary }}>primária</span> e <span style={{ color: theme.accent }}>destaque</span>.</p>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

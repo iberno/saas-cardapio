@@ -3,7 +3,6 @@ import { Outlet } from '@tanstack/react-router'
 import { Menu } from 'lucide-react'
 import { AdminSidebar } from './AdminSidebar'
 import { useAuth } from '../../lib/auth-context'
-import { Spinner } from '../ui'
 import type { TenantUser, PlatformUser } from '../../types'
 
 export function AdminLayout() {
@@ -13,7 +12,7 @@ export function AdminLayout() {
   if (loading) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
-        <Spinner size="lg" />
+        <span className="loading loading-spinner loading-lg" />
       </div>
     )
   }

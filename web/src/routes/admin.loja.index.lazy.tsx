@@ -2,7 +2,6 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../lib/auth-context'
 import { listarProdutos } from '../services/produtos.service'
-import { Card } from '../components/ui'
 import { Package } from 'lucide-react'
 import type { TenantUser } from '../types'
 
@@ -24,20 +23,20 @@ function StoreDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Minha Loja</h1>
-      <p className="text-white/60">
+      <h1 className="text-2xl font-bold">Minha Loja</h1>
+      <p className="opacity-60">
         Bem-vindo, {user && 'name' in user ? (user as TenantUser).name : ''}
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <div className="rounded-xl border border-base-300 p-6 bg-base-100">
           <div className="flex items-center gap-3">
             <Package className="text-accent" size={24} />
             <div>
-              <p className="text-2xl font-bold text-white">{totalProdutos}</p>
-              <p className="text-sm text-white/60">Produtos</p>
+              <p className="text-2xl font-bold">{totalProdutos}</p>
+              <p className="text-sm opacity-60">Produtos</p>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   )

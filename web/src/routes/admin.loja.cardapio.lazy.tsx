@@ -2,7 +2,6 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../lib/auth-context'
 import { listarProdutos, criarProduto, atualizarProduto, excluirProduto } from '../services/produtos.service'
-import { Card, Button, Badge, Spinner, Input } from '../components/ui'
 import { Plus, Pencil, Trash2, X, Check } from 'lucide-react'
 import type { Produto, CreateProdutoRequest, UpdateProdutoRequest, Categoria } from '../types'
 import { CATEGORIAS, CATEGORIA_LABEL } from '../types'
@@ -78,29 +77,40 @@ function CardapioPage() {
 
   if (!tenantId) {
     return (
-      <Card><p className="text-white/60">Faça login como usuário da loja.</p></Card>
+      <div className="rounded-xl border border-base-300 p-6 bg-base-100"><p className="opacity-60">Faça login como usuário da loja.</p></div>
     )
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Cardápio</h1>
-        <Button icon={Plus} onClick={() => { resetForm(); setShowForm(true) }}>Novo Produto</Button>
+        <h1 className="text-2xl font-bold">Cardápio</h1>
+        <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>
+          <Plus size={16} />Novo Produto
+        </button>
       </div>
 
       {showForm && (
-        <Card>
+        <div className="rounded-xl border border-base-300 p-6 bg-base-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-semibold">{editId ? 'Editar' : 'Novo'} Produto</h3>
-            <button onClick={resetForm} className="text-white/60 hover:text-white"><X size={18} /></button>
+            <h3 className="font-semibold">{editId ? 'Editar' : 'Novo'} Produto</h3>
+            <button onClick={resetForm} className="opacity-60 hover:opacity-100"><X size={18} /></button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
-            <Input label="Descrição" value={form.descricao || ''} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
-            <Input label="Preço (R$)" type="number" step="0.01" value={form.preco} onChange={(e) => setForm({ ...form, preco: Number(e.target.value) })} />
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Nome</legend>
+              <input className="input w-full" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Descrição</legend>
+              <input className="input w-full" value={form.descricao || ''} onChange={(e) => setForm({ ...form, descricao: e.target.value })} />
+            </fieldset>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Preço (R$)</legend>
+              <input className="input w-full" type="number" step="0.01" value={form.preco} onChange={(e) => setForm({ ...form, preco: Number(e.target.value) })} />
+            </fieldset>
             <div>
-              <label className="text-sm text-white/60 block mb-1">Categoria</label>
+              <label className="text-sm opacity-60 block mb-1">Categoria</label>
               <select
                 className="select w-full"
                 value={form.categoria}
@@ -111,33 +121,33 @@ function CardapioPage() {
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            <Button onClick={handleSave} icon={Check}>Salvar</Button>
-            <Button variant="ghost" onClick={resetForm}>Cancelar</Button>
+            <button className="btn btn-primary" onClick={handleSave}><Check size={16} />Salvar</button>
+            <button className="btn btn-ghost" onClick={resetForm}>Cancelar</button>
           </div>
-        </Card>
+        </div>
       )}
 
       {loading ? (
-        <Spinner size="lg" />
+        <span className="loading loading-spinner loading-lg" />
       ) : produtos.length === 0 ? (
-        <Card><p className="text-white/60 text-center">Nenhum produto. Crie o primeiro!</p></Card>
+        <div className="rounded-xl border border-base-300 p-6 bg-base-100"><p className="opacity-60 text-center">Nenhum produto. Crie o primeiro!</p></div>
       ) : (
         <div className="grid gap-3">
           {CATEGORIAS.map((cat) => {
             const items = produtos.filter((p) => p.categoria === cat)
             if (items.length === 0) return null
             return (
-              <Card key={cat}>
+              <div key={cat} className="rounded-xl border border-base-300 p-6 bg-base-100">
                 <h3 className="text-accent font-semibold mb-3">{CATEGORIA_LABEL[cat]}</h3>
                 <div className="divide-y divide-base-300">
                   {items.map((p) => (
                     <div key={p.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className={`text-white font-medium ${!p.disponivel ? 'line-through opacity-50' : ''}`}>{p.nome}</span>
-                          {p.destaque && <Badge color="info">Destaque</Badge>}
+                          <span className={`font-medium ${!p.disponivel ? 'line-through opacity-50' : ''}`}>{p.nome}</span>
+                          {p.destaque && <span className="badge badge-info">Destaque</span>}
                         </div>
-                        {p.descricao && <p className="text-xs text-white/50 mt-0.5">{p.descricao}</p>}
+                        {p.descricao && <p className="text-xs opacity-50 mt-0.5">{p.descricao}</p>}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold text-accent">R$ {Number(p.preco).toFixed(2)}</span>
@@ -154,7 +164,7 @@ function CardapioPage() {
                     </div>
                   ))}
                 </div>
-              </Card>
+              </div>
             )
           })}
         </div>

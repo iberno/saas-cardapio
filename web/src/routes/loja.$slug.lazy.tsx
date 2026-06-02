@@ -1,7 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { api } from '../lib/api-client'
-import { Spinner } from '../components/ui'
 import type { Produto, StoreTheme } from '../types'
 import { CATEGORIAS, CATEGORIA_LABEL } from '../types'
 import { Phone } from 'lucide-react'
@@ -42,7 +41,7 @@ function PublicCardapioPage() {
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center" style={{ backgroundColor: t.base100 || '#faf5f0' }}>
-        <Spinner size="lg" />
+        <span className="loading loading-spinner loading-lg" />
       </div>
     )
   }
