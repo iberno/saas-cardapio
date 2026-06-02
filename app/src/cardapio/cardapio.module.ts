@@ -6,9 +6,10 @@ import { TokenService } from '../auth/shared/token.service';
 import { JwtService } from '@nestjs/jwt';
 import { UploadModule } from './upload/upload.module';
 import { TenantModule } from '../tenant/tenant.module';
+import { CategoriasModule } from './categorias/categorias.module';
 
 @Module({
-  imports: [UploadModule, TenantModule],
+  imports: [UploadModule, TenantModule, CategoriasModule],
   controllers: [CardapioController, PublicCardapioController],
   providers: [CardapioService, TokenService, JwtService],
 })
