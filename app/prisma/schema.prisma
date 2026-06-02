@@ -37,6 +37,8 @@ model Tenant {
   tenantUsers TenantUser[]
   customers   Customer[]
   produtos    Produto[]
+  categorias  CategoriaCardapio[]
+  banners     Banner[]
 
   @@index([status])
   @@map("tenants")
@@ -103,23 +105,106 @@ model Customer {
 }
 
 model Produto {
-  id         String    @id @default(uuid()) @db.Uuid
-  tenantId   String    @map("tenant_id") @db.Uuid
-  nome       String
-  descricao  String?
-  preco      Decimal   @db.Decimal(10, 2)
-  categoria  Categoria
-  disponivel Boolean   @default(true)
-  destaque   Boolean   @default(false)
-  imagemUrl  String?   @map("imagem_url")
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
+  id                   String    @id @default(uuid()) @db.Uuid
+  tenantId             String    @map("tenant_id") @db.Uuid
+  nome                 String
+  descricao            String?
+  preco                Decimal   @db.Decimal(10, 2)
+  categoria            Categoria
+  categoriaId          String?   @map("categoria_id") @db.Uuid
+  exibirPrecoAPartirDe Boolean   @default(true) @map("exibir_preco_a_partir_de")
+  disponivel           Boolean   @default(true)
+  destaque             Boolean   @default(false)
+  imagemUrl            String?   @map("imagem_url")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant           Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  categoriaCardapio CategoriaCardapio?  @relation(fields: [categoriaId], references: [id])
+  variantes        ProdutoVariante[]
+  grupos           Grupo[]
 
   @@index([tenantId])
   @@index([tenantId, categoria])
+  @@index([tenantId, categoriaId])
   @@map("produtos")
+}
+
+model CategoriaCardapio {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  nome      String
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  produtos Produto[]
+
+  @@unique([tenantId, nome])
+  @@index([tenantId, ordem])
+  @@map("categorias")
+}
+
+model ProdutoVariante {
+  id        String   @id @default(uuid()) @db.Uuid
+  produtoId String   @map("produto_id") @db.Uuid
+  nome      String
+  preco     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@index([produtoId])
+  @@map("produto_variantes")
+}
+
+model Grupo {
+  id        String   @id @default(uuid()) @db.Uuid
+  produtoId String   @map("produto_id") @db.Uuid
+  nome      String
+  maxSelect Int      @default(1)
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  produto Produto    @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  itens   GrupoItem[]
+
+  @@index([produtoId, ordem])
+  @@map("grupos")
+}
+
+model GrupoItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  grupoId   String   @map("grupo_id") @db.Uuid
+  nome      String
+  preco     Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  grupo Grupo @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+
+  @@index([grupoId])
+  @@map("grupo_itens")
+}
+
+model Banner {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  imagemUrl String   @map("imagem_url")
+  linkUrl   String?  @map("link_url")
+  titulo    String?
+  ordem     Int      @default(0)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, ordem])
+  @@map("banners")
 }
 
 enum UserType {
