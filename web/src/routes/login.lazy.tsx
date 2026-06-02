@@ -9,25 +9,26 @@ export const Route = createLazyFileRoute('/login')({
 })
 
 function LoginPage() {
-  const { login, user } = useAuth()
+  const { login, user, isPlatform } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [slug, setSlug] = useState('')
   const [type, setType] = useState<'platform' | 'tenant'>('platform')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (user) navigate({ to: '/admin' })
-  }, [user, navigate])
+    if (!user) return
+    navigate({ to: isPlatform ? '/admin' : '/admin/loja' })
+  }, [user, navigate, isPlatform])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      await login(email, password, type)
-      navigate({ to: '/admin' })
+      await login(email, password, type, slug || undefined)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Falha ao autenticar')
     } finally {
@@ -49,6 +50,9 @@ function LoginPage() {
           </div>
           <Input label="Email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <Input label="Senha" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          {type === 'tenant' && (
+            <Input label="Loja (slug)" placeholder="ex: acai" value={slug} onChange={(e) => setSlug(e.target.value)} required />
+          )}
           {error && <p className="text-error text-sm">{error}</p>}
           <Button type="submit" loading={loading} icon={LogIn} className="w-full">Entrar</Button>
         </form>

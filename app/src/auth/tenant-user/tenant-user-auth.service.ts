@@ -19,15 +19,22 @@ export class TenantUserAuthService {
     private audit: AuditService,
   ) {}
 
-  async login(email: string, password: string, ip: string, userAgent?: string) {
-    const tenant = TenantContext.require();
+  async login(email: string, password: string, ip: string, userAgent?: string, slug?: string) {
+    let tenantId: string;
+    if (slug) {
+      const tenant = await this.prisma.platform().tenant.findUnique({ where: { slug }, select: { id: true } });
+      if (!tenant) throw new UnauthorizedException('Invalid credentials');
+      tenantId = tenant.id;
+    } else {
+      tenantId = TenantContext.require().tenantId;
+    }
 
-    const user = await this.prisma.scoped.tenantUser.findFirst({
-      where: { tenantId: tenant.tenantId, email },
+    const user = await this.prisma.platform().tenantUser.findFirst({
+      where: { tenantId, email },
     });
 
     if (!user) {
-      await this.recordAttempt('TENANT_USER', email, tenant.tenantId, ip, userAgent, false);
+      await this.recordAttempt('TENANT_USER', email, tenantId, ip, userAgent, false);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -38,24 +45,24 @@ export class TenantUserAuthService {
     const valid = await verifyPassword(user.passwordHash, password);
     if (!valid) {
       await this.incrementFailedAttempts(user.id);
-      await this.recordAttempt('TENANT_USER', email, tenant.tenantId, ip, userAgent, false);
+      await this.recordAttempt('TENANT_USER', email, tenantId, ip, userAgent, false);
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    await this.prisma.scoped.tenantUser.update({
+    await this.prisma.platform().tenantUser.update({
       where: { id: user.id },
       data: { failedLoginCount: 0, lockedUntil: null, lastLoginAt: new Date() },
     });
 
     await this.audit.log({
-      tenantId: tenant.tenantId,
+      tenantId,
       actorType: 'TENANT_USER',
       actorId: user.id,
       action: 'login',
       ip,
     });
 
-    return this.createSession(user, tenant.tenantId, ip, userAgent);
+    return this.createSession(user, tenantId, ip, userAgent);
   }
 
   async refresh(refreshToken: string, ip: string, userAgent?: string) {
@@ -113,20 +120,20 @@ export class TenantUserAuthService {
   }
 
   private async createSessionFromToken(stored: any, ip: string, userAgent?: string) {
-    const user = await this.prisma.scoped.tenantUser.findUnique({ where: { id: stored.userId } });
+    const user = await this.prisma.platform().tenantUser.findUnique({ where: { id: stored.userId } });
     if (!user) throw new UnauthorizedException('User not found');
     return this.createSession(user, stored.tenantId!, ip, userAgent);
   }
 
   private async incrementFailedAttempts(userId: string) {
-    const user = await this.prisma.scoped.tenantUser.findUnique({ where: { id: userId } });
+    const user = await this.prisma.platform().tenantUser.findUnique({ where: { id: userId } });
     if (!user) return;
     const count = user.failedLoginCount + 1;
     const data: any = { failedLoginCount: count };
     if (count >= 5) {
       data.lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
     }
-    await this.prisma.scoped.tenantUser.update({ where: { id: userId }, data });
+    await this.prisma.platform().tenantUser.update({ where: { id: userId }, data });
   }
 
   private async recordAttempt(userType: string, identifier: string, tenantId: string | null, ip: string, userAgent: string | undefined, success: boolean) {

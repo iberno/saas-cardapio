@@ -15,7 +15,7 @@ interface AuthContextValue {
   user: User
   loading: boolean
   isPlatform: boolean
-  login: (email: string, password: string, type: 'platform' | 'tenant') => Promise<void>
+  login: (email: string, password: string, type: 'platform' | 'tenant', slug?: string) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -48,9 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => { fetchUser() }, [fetchUser])
 
   const login = useCallback(
-    async (email: string, password: string, type: 'platform' | 'tenant') => {
+    async (email: string, password: string, type: 'platform' | 'tenant', slug?: string) => {
       const endpoint = type === 'platform' ? '/platform/auth/login' : '/tenant/auth/login'
-      await api.post<{ message: string }>(endpoint, { email, password })
+      const body: Record<string, string> = { email, password }
+      if (slug) body.slug = slug
+      await api.post<{ message: string }>(endpoint, body)
       await fetchUser()
     },
     [fetchUser],

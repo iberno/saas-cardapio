@@ -18,7 +18,7 @@ export class TenantUserAuthController {
   ) {
     const ip = req.ip || '';
     const ua = req.headers['user-agent'];
-    const { accessToken, refreshToken } = await this.service.login(dto.email, dto.password, ip, ua);
+    const { accessToken, refreshToken } = await this.service.login(dto.email, dto.password, ip, ua, dto.slug);
     setTenantUserCookies(res, accessToken, refreshToken);
     return { message: 'Authenticated' };
   }
@@ -52,11 +52,11 @@ export class TenantUserAuthController {
 
 function setTenantUserCookies(res: Response, accessToken: string, refreshToken: string) {
   const secure = process.env.NODE_ENV === 'production';
-  res.cookie('tu_session', accessToken, { httpOnly: true, secure, sameSite: 'lax', path: '/admin', maxAge: 15 * 60 * 1000 });
-  res.cookie('tu_session_refresh', refreshToken, { httpOnly: true, secure, sameSite: 'lax', path: '/admin', maxAge: 7 * 24 * 60 * 60 * 1000 });
+  res.cookie('tu_session', accessToken, { httpOnly: true, secure, sameSite: 'lax', path: '/', maxAge: 15 * 60 * 1000 });
+  res.cookie('tu_session_refresh', refreshToken, { httpOnly: true, secure, sameSite: 'lax', path: '/', maxAge: 7 * 24 * 60 * 60 * 1000 });
 }
 
 function clearTenantUserCookies(res: Response) {
-  res.clearCookie('tu_session', { path: '/admin' });
-  res.clearCookie('tu_session_refresh', { path: '/admin' });
+  res.clearCookie('tu_session', { path: '/' });
+  res.clearCookie('tu_session_refresh', { path: '/' });
 }
