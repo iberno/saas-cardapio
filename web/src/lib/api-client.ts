@@ -24,6 +24,16 @@ export class ApiError extends Error {
   }
 }
 
+async function safeParseError(res: Response): Promise<{ message: string }> {
+  try {
+    const text = await res.text()
+    if (!text) return { message: res.statusText }
+    return JSON.parse(text)
+  } catch {
+    return { message: res.statusText }
+  }
+}
+
 async function request<T>(
   method: string,
   path: string,
@@ -51,17 +61,21 @@ async function request<T>(
         body: body !== undefined ? JSON.stringify(body) : undefined,
       })
       if (retry.ok) {
-        return retry.status === 204 ? undefined as T : retry.json()
+        if (retry.status === 204) return undefined as T
+        const body = await retry.text()
+        return body ? JSON.parse(body) : undefined as T
       }
-      const err2 = await retry.json().catch(() => ({ message: retry.statusText }))
+      const err2 = await safeParseError(retry)
       throw new ApiError(retry.status, err2.message || 'Request failed')
     }
-    const error = await res.json().catch(() => ({ message: res.statusText }))
-    throw new ApiError(res.status, error.message || 'Request failed')
+    const err = await safeParseError(res)
+    throw new ApiError(res.status, err.message || 'Request failed')
   }
 
   if (res.status === 204) return undefined as T
-  return res.json()
+  const text = await res.text()
+  if (!text) return undefined as T
+  return JSON.parse(text)
 }
 
 export const api = {

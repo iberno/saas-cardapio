@@ -37,6 +37,6 @@ export class CategoriasService {
   async remove(id: string) {
     const count = await this.prisma.platform().produto.count({ where: { categoriaId: id } });
     if (count > 0) throw new BadRequestException('Exclua os produtos desta categoria primeiro');
-    await this.prisma.platform().categoriaCardapio.delete({ where: { id } });
+    await this.prisma.platform().categoriaCardapio.deleteMany({ where: { id } });
   }
 }
