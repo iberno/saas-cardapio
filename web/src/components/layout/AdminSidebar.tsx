@@ -1,5 +1,6 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { Store, ClipboardList, LayoutDashboard, LogOut, X } from 'lucide-react'
+import { Store, ClipboardList, LayoutDashboard, LogOut, X, Palette } from 'lucide-react'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../../lib/auth-context'
 
@@ -27,6 +28,12 @@ const navItems: NavItem[] = [
     label: 'Cardápio',
     path: '/admin/loja',
     icon: ClipboardList,
+    showFor: 'tenant',
+  },
+  {
+    label: 'Aparência',
+    path: '/admin/loja/aparencia',
+    icon: Palette,
     showFor: 'tenant',
   },
 ]
@@ -85,7 +92,11 @@ export function AdminSidebar({ onClose }: AdminSidebarProps) {
           })}
       </nav>
 
-      <div className="p-4 border-t border-base-300 shrink-0">
+      <div className="p-4 border-t border-base-300 shrink-0 space-y-1">
+        <div className="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-white/60">
+          <span>Tema</span>
+          <ThemeToggle />
+        </div>
         <button
           onClick={logout}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-base-300 w-full transition-colors"

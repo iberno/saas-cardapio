@@ -26,6 +26,7 @@ model Tenant {
   slug         String       @unique
   name         String
   status       TenantStatus @default(TRIAL)
+  theme        Json?        @map("theme")
   contactEmail String       @map("contact_email")
   contactPhone String?      @map("contact_phone")
   trialEndsAt  DateTime?    @map("trial_ends_at")

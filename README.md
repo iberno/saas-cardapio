@@ -53,12 +53,13 @@ saas-cardapio/
 - [x] Dashboard da loja
 - [x] CRUD de produtos (nome, descrição, preço, categoria, disponível)
 - [x] Produtos agrupados por categoria
-- [ ] Customização de cores (primária, secundária, fundo, etc.)
-- [ ] Troca de tema claro/escuro
+- [x] Customização de cores (primária, secundária, fundo, etc.)
+- [x] Troca de tema claro/escuro (toggle global Sun/Moon)
 
 ### Público
-- [ ] Cardápio online por slug (`/loja/:slug`)
-- [ ] Tema customizado da loja aplicado automaticamente
+- [x] Cardápio online por slug (`/loja/:slug`)
+- [x] Tema customizado da loja aplicado automaticamente
+- [x] Botão "Pedir pelo WhatsApp"
 
 ## Como Rodar
 

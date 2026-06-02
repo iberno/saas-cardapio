@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
+import { ThemeToggle } from '../ui/ThemeToggle'
 
 export function Header() {
   const [open, setOpen] = useState(false)
@@ -19,6 +20,7 @@ export function Header() {
           <Link to="/login" className="btn btn-sm bg-accent text-white border-accent hover:bg-accent/90">
             Teste Grátis
           </Link>
+          <ThemeToggle />
         </nav>
 
         <button className="md:hidden btn btn-ghost btn-sm" onClick={() => setOpen(!open)}>
