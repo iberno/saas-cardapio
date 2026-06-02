@@ -9,9 +9,10 @@ export class CreateProdutoDto {
   @IsString()
   descricao?: string;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  preco: number;
+  preco?: number;
 
   @IsOptional()
   @IsEnum(Categoria)

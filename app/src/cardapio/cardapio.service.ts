@@ -64,7 +64,7 @@ export class CardapioService {
 
   create(tenantId: string, dto: CreateProdutoDto) {
     const data: any = { ...dto, tenantId };
-    data.preco = new Prisma.Decimal(dto.preco);
+    data.preco = dto.preco !== undefined ? new Prisma.Decimal(dto.preco) : new Prisma.Decimal(0);
     data.categoria = dto.categoria ?? 'BEBIDAS';
     return this.prisma.platform().produto.create({ data });
   }
