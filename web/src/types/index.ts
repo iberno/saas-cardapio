@@ -3,3 +3,7 @@ export type { Tenant, CreateTenantRequest, UpdateTenantStatusRequest } from './t
 export type { Produto, CreateProdutoRequest, UpdateProdutoRequest, PageResponse, Categoria, Ordenacao } from './cardapio'
 export { CATEGORIAS, CATEGORIA_LABEL } from './cardapio'
 export type { StoreTheme } from './theme'
+export type { Categoria, CreateCategoriaRequest, UpdateCategoriaRequest } from './categoria'
+export type { ProdutoVariante, CreateVarianteRequest, UpdateVarianteRequest } from './variante'
+export type { Grupo, GrupoItem, CreateGrupoRequest, UpdateGrupoRequest, CreateGrupoItemRequest, UpdateGrupoItemRequest } from './grupo'
+export type { Banner, CreateBannerRequest, UpdateBannerRequest } from './banner'
