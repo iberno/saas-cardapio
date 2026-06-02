@@ -42,6 +42,7 @@ export interface CreateProdutoRequest {
   disponivel?: boolean
   destaque?: boolean
   imagemUrl?: string
+  exibirPrecoAPartirDe?: boolean
 }
 
 export interface UpdateProdutoRequest {
@@ -53,6 +54,7 @@ export interface UpdateProdutoRequest {
   disponivel?: boolean
   destaque?: boolean
   imagemUrl?: string
+  exibirPrecoAPartirDe?: boolean
 }
 
 export type Ordenacao = 'nome' | 'preco' | 'categoria' | 'criacao'

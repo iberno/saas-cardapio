@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Param, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { TenantUserAuthGuard } from '../../common/guards/tenant-user-auth.guard';
@@ -28,6 +28,13 @@ export class UploadController {
     const tenant = await this.tenantService.findById(tenantId);
     if (!tenant) throw new BadRequestException('Tenant not found');
     return this.service.upload(file, tenant.slug);
+  }
+
+  @Get('galeria')
+  async listar(@Param('tenantId') tenantId: string) {
+    const tenant = await this.tenantService.findById(tenantId);
+    if (!tenant) throw new BadRequestException('Tenant not found');
+    return this.service.listar(tenant.slug);
   }
 
   @Delete('uploads/:filename')

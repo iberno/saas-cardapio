@@ -31,25 +31,42 @@ export class CardapioService {
     if (params.categoria) where.categoria = params.categoria;
 
     const [data, total] = await Promise.all([
-      this.prisma.platform().produto.findMany({ where, skip, take: limit, orderBy }),
+      this.prisma.platform().produto.findMany({
+        where, skip, take: limit, orderBy,
+        include: { variantes: true, categoriaCardapio: true },
+      }),
       this.prisma.platform().produto.count({ where }),
     ]);
 
-    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+    const dataWithPreco = data.map((produto) => {
+      if (produto.variantes.length > 0) {
+        const minPreco = Math.min(...produto.variantes.map((v) => Number(v.preco)));
+        return { ...produto, preco: new Prisma.Decimal(minPreco) };
+      }
+      return produto;
+    });
+
+    return { data: dataWithPreco, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findOne(tenantId: string, id: string) {
     const produto = await this.prisma.platform().produto.findFirst({
       where: { id, tenantId },
+      include: { variantes: true, categoriaCardapio: true },
     });
     if (!produto) throw new NotFoundException('Produto not found');
+    if (produto.variantes.length > 0) {
+      const minPreco = Math.min(...produto.variantes.map((v) => Number(v.preco)));
+      return { ...produto, preco: new Prisma.Decimal(minPreco) };
+    }
     return produto;
   }
 
   create(tenantId: string, dto: CreateProdutoDto) {
-    return this.prisma.platform().produto.create({
-      data: { ...dto, tenantId, preco: new Prisma.Decimal(dto.preco) },
-    });
+    const data: any = { ...dto, tenantId };
+    data.preco = new Prisma.Decimal(dto.preco);
+    data.categoria = dto.categoria ?? 'BEBIDAS';
+    return this.prisma.platform().produto.create({ data });
   }
 
   async update(tenantId: string, id: string, dto: UpdateProdutoDto) {

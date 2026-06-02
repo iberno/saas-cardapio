@@ -43,6 +43,7 @@ interface FState {
   descricao: string
   categoriaId: string
   imagemUrl: string | null
+  exibirPrecoAPartirDe: boolean
   variantes: FVar[]
   grupos: FGrupo[]
 }
@@ -52,6 +53,7 @@ const blank = (cats: Categoria[]): FState => ({
   descricao: '',
   categoriaId: cats[0]?.id || '',
   imagemUrl: null,
+  exibirPrecoAPartirDe: true,
   variantes: [],
   grupos: [],
 })
@@ -112,6 +114,7 @@ function CardapioPage() {
       descricao: p.descricao || '',
       categoriaId: p.categoriaId || '',
       imagemUrl: p.imagemUrl,
+      exibirPrecoAPartirDe: p.exibirPrecoAPartirDe,
       variantes: [],
       grupos: [],
     }
@@ -144,6 +147,7 @@ function CardapioPage() {
           descricao: form.descricao || undefined,
           categoriaId: form.categoriaId || undefined,
           imagemUrl: form.imagemUrl || undefined,
+          exibirPrecoAPartirDe: form.exibirPrecoAPartirDe,
         })
         const oldVars = await listarVariantes(tenantId, editId)
         await Promise.all(oldVars.map((v) => excluirVariante(tenantId, editId, v.id)))
@@ -160,6 +164,7 @@ function CardapioPage() {
           descricao: form.descricao || undefined,
           categoriaId: form.categoriaId || undefined,
           imagemUrl: form.imagemUrl || undefined,
+          exibirPrecoAPartirDe: form.exibirPrecoAPartirDe,
         })
         for (const v of form.variantes) await criarVariante(tenantId, created.id, { nome: v.nome, preco: v.preco })
         for (const g of form.grupos) {
@@ -383,6 +388,15 @@ function CardapioPage() {
                 onRemove={() => setForm({ ...form, imagemUrl: null })}
               />
             </fieldset>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.exibirPrecoAPartirDe}
+                onChange={(e) => setForm((f) => ({ ...f, exibirPrecoAPartirDe: e.target.checked }))}
+                className="checkbox checkbox-sm"
+              />
+              <span className="text-sm">Exibir "a partir de"</span>
+            </label>
           </div>
 
           <hr className="my-4" />

@@ -13,8 +13,9 @@ export class CreateProdutoDto {
   @Min(0)
   preco: number;
 
+  @IsOptional()
   @IsEnum(Categoria)
-  categoria: Categoria;
+  categoria?: Categoria;
 
   @IsOptional()
   @IsUUID()
@@ -31,4 +32,8 @@ export class CreateProdutoDto {
   @IsOptional()
   @IsString()
   imagemUrl?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  exibirPrecoAPartirDe?: boolean;
 }

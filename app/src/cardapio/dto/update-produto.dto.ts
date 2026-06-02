@@ -30,4 +30,8 @@ export class UpdateProdutoDto {
   @IsOptional()
   @IsString()
   imagemUrl?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  exibirPrecoAPartirDe?: boolean;
 }
