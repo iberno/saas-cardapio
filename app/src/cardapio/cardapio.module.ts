@@ -4,8 +4,11 @@ import { PublicCardapioController } from './public-cardapio.controller';
 import { CardapioService } from './cardapio.service';
 import { TokenService } from '../auth/shared/token.service';
 import { JwtService } from '@nestjs/jwt';
+import { UploadModule } from './upload/upload.module';
+import { TenantModule } from '../tenant/tenant.module';
 
 @Module({
+  imports: [UploadModule, TenantModule],
   controllers: [CardapioController, PublicCardapioController],
   providers: [CardapioService, TokenService, JwtService],
 })
