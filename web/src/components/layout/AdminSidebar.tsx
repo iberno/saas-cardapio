@@ -42,6 +42,12 @@ const navItems: NavItem[] = [
     icon: Palette,
     showFor: 'tenant',
   },
+  {
+    label: 'Banners',
+    path: '/admin/loja/banners',
+    icon: Image,
+    showFor: 'tenant',
+  },
 ]
 
 interface AdminSidebarProps {
