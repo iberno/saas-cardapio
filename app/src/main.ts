@@ -46,7 +46,7 @@ async function bootstrap() {
 
   const httpAdapter = app.getHttpAdapter();
   httpAdapter.get('/api/auth/csrf', (req: any, res: any) => {
-    const token = generateToken(req, res);
+    const token = generateToken(req, res, true);
     res.json({ csrfToken: token });
   });
 
