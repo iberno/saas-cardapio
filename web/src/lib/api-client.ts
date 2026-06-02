@@ -5,6 +5,10 @@ let csrfToken: string | null = null
 async function obtainCsrf(): Promise<string> {
   if (csrfToken) return csrfToken
   const res = await fetch(`${BASE_URL}/auth/csrf`, { credentials: 'include' })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new ApiError(res.status, `CSRF failed: ${text || res.statusText}`)
+  }
   const data = await res.json()
   csrfToken = data.csrfToken
   return csrfToken!
