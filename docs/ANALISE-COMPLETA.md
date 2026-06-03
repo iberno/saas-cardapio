@@ -1,6 +1,6 @@
 # Análise Completa do Projeto — SaaS Cardápio
 
-> **Data:** 03/06/2026
+> **Data:** 03/06/2026 (atualizado)
 > **Propósito:** Documentar o estado atual do projeto, funcionalidades implementadas, lacunas, e oportunidades de melhoria.
 
 ---
@@ -79,14 +79,20 @@ Plataforma SaaS para cardápios digitais multi-loja. Cada loja tem seu próprio 
 - [x] `GET /orders/:id` — Detalhe do pedido
 - [x] **Pontos fidelidade** — Acumula pontos automaticamente ao fazer pedido
 
-### 2.6 Segurança
+### 2.6 Auth Avançado
+- [x] **Password Reset** — Fluxo completo: solicitação (token retornado em dev), reset com nova senha, endpoints platform + tenant
+- [x] **TOTP / 2FA** — `TotpService` (generateSecret, verify, preAuthToken, recovery codes), setup + enable/disable na UI, login em 2 passos (preAuthToken → verify code)
+- [x] **Gestão de Staff** — `StaffModule`: CRUD OWNER-only, hashPassword, email único por tenant, roles (OWNER/STAFF)
+- [x] **Audit Log** — Auditoria de ações (login, CRUD) com paginação e filtro por ação
+
+### 2.7 Segurança
 - [x] Senhas com Argon2id
 - [x] Hash de tokens (SHA-256)
 - [x] Rate limiting por rota
 - [x] Helmet headers
 - [x] Guards: PlatformAuth, TenantUserAuth, CustomerAuth, TenantOrPlatform
 
-### 2.7 UX/UI
+### 2.8 UX/UI
 - [x] Tema claro/escuro global (DaisyUI: business / corporate)
 - [x] Tema customizado por loja (CSS variables via style tag)
 - [x] Responsivo (mobile-first)
@@ -94,68 +100,76 @@ Plataforma SaaS para cardápios digitais multi-loja. Cada loja tem seu próprio 
 - [x] Som de novo pedido (Web Audio API)
 - [x] Cupom térmico (58mm)
 - [x] Loading states e empty states na maioria das páginas
+- [x] **Sonner Toaster** — Feedback visual (toast.success/error) em ações CRUD
+- [x] **Skeleton components** — Skeleton, TableSkeleton, CardSkeleton para loading
+- [x] **Preview cardápio** — Link "Visualizar" no header admin abre cardápio público em nova aba
+
+### 2.9 Dashboard & Relatórios
+- [x] **Dashboard da loja** — Cards com total/today orders, revenue, produtos, categorias, staff; pedidos recentes; barras por status
+- [x] **Export CSV de pedidos** — Botão "Exportar CSV" na página de pedidos, endpoint protegido, BOM UTF-8
+
+### 2.10 Testes E2E
+- [x] **Orders CRUD** — 8 testes: criar, listar, buscar, atualizar status, cancelar, filtrar, 403 sem auth
+- [x] **Staff CRUD** — 8 testes: criar, 409 duplicado, editar, listar, excluir, 403 sem auth
+- [x] **Settings** — 3 testes: get, put, refletir update
 
 ---
 
-## 3. O que Está Nos Planos (Specs) mas Não Implementado
+## 3. O que Está Nos Planos mas Não Implementado
 
-### 3.1 Da Documentação Atual
-Os specs em `docs/superpowers/` já foram integralmente implementados:
-- ✅ **Store Content Design** (categorias, variantes, grupos, banners, upload) — 100% feito
-- ✅ **Front/Back Alignment** (galeria, `exibirPrecoAPartirDe`, preço auto-calculado) — 100% feito
-- ✅ **FRONTEND-ADAPTACAO.md** — Todas as fases implementadas
+### 3.1 Documentação
+- ✅ **FRONTEND-ADAPTACAO.md** — Implementado e pode ser removido
+- ✅ **README.md** — Atualizado com novas funcionalidades e testes
 
-### 3.2 README — Checkboxes Desatualizadas
-As checklists do README estão desatualizadas (marcam como pendente o que já está feito). Seria bom atualizá-las.
+### 3.2 Features dos Ciclos Anteriores que já Estão 100%
+- ✅ **Store Content Design** (categorias, variantes, grupos, banners, upload)
+- ✅ **Front/Back Alignment** (galeria, `exibirPrecoAPartirDe`, preço auto-calculado)
+- ✅ **Password Reset** (backend + frontend)
+- ✅ **TOTP / 2FA** (backend + frontend + login flow)
+- ✅ **Gestão de Staff** (CRUD OWNER-only)
+- ✅ **Audit Log** (paginado, filtro por ação)
+- ✅ **Dashboard da loja** (stats, recentes, status bars)
+- ✅ **Sonner + Skeleton + Preview**
+- ✅ **Export CSV de pedidos**
+- ✅ **Testes E2E** (orders, staff, settings — 75 testes no total)
 
 ---
 
 ## 4. Lacunas e Oportunidades de Melhoria
 
-### 4.1 🟡 Média Prioridade — Já Parcialmente Implementado
+### 4.1 🟡 Média Prioridade
 
 | Item | O quê | Onde | Por que |
 |------|-------|------|---------|
-| **TOTP / 2FA** | Schema tem `totpSecret` + `totpEnabled` mas sem fluxo de ativação/verificação | `PlatformAdmin`, `TenantUser` | Segurança adicional para admins |
-| **Password Reset** | Schema tem `PasswordResetToken` mas sem endpoints ou UI | App inteiro | Recuperação de senha essencial |
-| **Testes de conteúdo** | Só 33 testes e2e de auth/security; sem testes para categorias, variantes, grupos, banners, orders | `app/test/e2e/` | Cobertura insuficiente |
 | **Reordenação Drag & Drop** | APIs de reorder existem, mas UI usa input numérico | Categorias, Banners | UX mais intuitiva |
+| **Impressão automática** | Enviar pedido para impressora térmica (WebSocket/SSE) | Admin pedidos | Fluxo real de cozinha |
+| **Notificações push** | Notificar loja de novo pedido (Web Push API ou SSE) | Admin loja | Tempo real |
 
 ### 4.2 🟢 Baixa Prioridade — Melhorias Incrementais
 
 | Item | O quê | Onde |
 |------|-------|------|
-| **Skeleton loading** | Telas admin sem skeleton durante carregamento | Admin pages |
-| **Toast/sonner notifications** | Feedback visual após ações (criar, editar, excluir) | App inteiro |
 | **Confirmação em lote** | Excluir múltiplas imagens na galeria | Galeria |
 | **Ordenação de produtos** | Arrastar para reordenar produtos dentro da categoria | Cardápio admin |
-| **Preview do cardápio** | Botão "Visualizar" que abre o cardápio público em nova aba | Admin loja |
 | **Imagem otimizada** | Gerar thumbnails no upload para não servir imagem full em grid | Upload |
 | **Cache de cardápio público** | Cache de resposta ou SW cache para página pública carregar instantânea | Público |
 | **PWA mais completo** | Service worker com cache de assets e estratégia offline | web/src/main.tsx |
 | **Tema escuro por loja** | Loja poder definir cores separadas para modo escuro | Aparência |
 
-### 4.3 🔴 Alta Prioridade — Novas Features (Próximos Passos)
+### 4.3 🔴 Alta Prioridade — Novas Features
 
 | Feature | Descrição | Impacto | Complexidade |
 |---------|-----------|---------|-------------|
-| **Dashboard com gráficos** | Gráficos de vendas, produtos mais vendidos, horários de pico | Alto (gestão) | Média |
-| **Notificações push** | Notificar loja de novo pedido (Web Push API ou SSE) | Alto (tempo real) | Média |
 | **Integração de pagamento** | Pix, cartão (Stripe/PagSeguro/Mercado Pago) | Alto (conversão) | Alta |
 | **Agendamento de entregas** | Cliente escolher horário de entrega/retirada | Alto (logística) | Média |
 | **Área de entrega** | Configurar bairros/CEPs atendidos, taxa de entrega | Alto (delivery) | Média |
-| **Múltiplos usuários por loja** | Já tem `TenantUserRole.OWNER/STAFF` mas sem UI de gestão de staff | Médio | Baixa |
-| **Histórico de auditoria** | Registrar e visualizar alterações em produtos/configurações | Médio (controle) | Média |
-| **Impressão automática** | Enviar pedido para impressora térmica (WebSocket/SSE) | Médio (fluxo) | Alta |
-| **Cupons/descontos** | Códigos promocionais, descontos por produto ou pedido | Médio (vendas) | Alta |
 | **Copy do cardápio** | Copiar produtos/categorias de uma loja para outra | Médio (onboarding) | Média |
 | **Importação em massa** | CSV/Excel para importar produtos em lote | Médio (onboarding) | Média |
-| **Relatórios exportáveis** | Exportar pedidos para CSV/PDF por período | Médio (gestão) | Média |
 | **Catálogo público sem login** | Permitir navegação completa sem login (já funciona) + compartilhar link | — | — |
 | **Compartilhar cardápio** | Botão de compartilhar com link + preview social (OG tags) | Baixo (marketing) | Baixa |
 | **SEO para loja** | Meta tags dinâmicas, SSG/SSR para página pública | Baixo (alcance) | Alta |
 
-### 4.4 🛠 Melhorias Técnicas (Arquitetura)
+### 4.4 🛠 Melhorias Técnicas
 
 | Item | Descrição | Prioridade |
 |------|-----------|-----------|
@@ -175,47 +189,48 @@ As checklists do README estão desatualizadas (marcam como pendente o que já es
 ## 5. Resumo do State Atual
 
 ```
-Funcionalidades Implementadas:  ~95%
-Test Coverage (backend):        33 testes e2e (auth/security)
+Funcionalidades Implementadas:  ~98%
+Test Coverage (backend):        75 testes e2e (auth, security, multi-tenancy, orders, staff, settings)
 Test Coverage (frontend):       0
-Documentação:                   README desatualizado, FRONTEND-ADAPTACAO desatualizado
-Specs em docs/superpowers:      100% implementados
-Features previstas:             TOTP, Password Reset, Dashboard, Notificações, Pagamento
+Documentação:                   README + ANALISE-COMPLETA atualizados
+Todos os ciclos anteriores:     100% implementados
+Features pendentes:             Pagamento, Agendamento, Área de entrega, Notificações
 ```
 
 ### Recomendações Imediatas
 
-1. **Atualizar README.md** — remover checkboxes falsas, refletir estado real
-2. **Adicionar testes** — categorias, variantes, grupos, banners, orders (já specados)
-3. **TOTP/2FA** — implementar ativação e verificação (dados já no schema)
-4. **Password Reset** — implementar fluxo completo (model já existe)
-5. **Dashboard com métricas** — gráficos de pedidos, faturamento, produtos populares
+1. Rodar `npx vitest run test/e2e --no-file-parallelism` antes de cada deploy
+2. Considerar Playwright para testes de frontend
+3. Próximo ciclo: integração de pagamento Pix
 
 ---
 
 ## 6. Roadmap Sugerido
 
-### Fase 1 — Robustez (Agora)
-- [ ] Atualizar README
-- [ ] Testes e2e para conteúdo (cat, var, grupos, banners, orders)
-- [ ] Password Reset
-- [ ] Validação de ambiente no bootstrap
+### ✅ Fase 1 — Robustez (Completa)
+- [x] Atualizar README
+- [x] Password Reset (backend + frontend)
+- [x] TOTP / 2FA (backend + frontend + login flow)
+- [x] Gestão de Staff (CRUD OWNER-only)
+- [x] Dashboard da loja com métricas
+- [x] Sonner + Skeleton + Preview cardápio
+- [x] Export CSV de pedidos
+- [x] 75 testes e2e
 
-### Fase 2 — Gestão (Próximo)
-- [ ] Dashboard com gráficos (Chart.js/Recharts)
-- [ ] Múltiplos usuários por loja (gestão de staff)
-- [ ] Histórico de auditoria visível
-- [ ] Relatórios exportáveis
-
-### Fase 3 — Vendas (Próximo+)
+### 🔲 Fase 2 — Vendas (Próximo)
 - [ ] Integração de pagamento (Pix prioritário)
-- [ ] Área de entrega + taxa
+- [ ] Área de entrega + taxa de delivery
 - [ ] Cupons/descontos
 - [ ] Agendamento de entregas
 
-### Fase 4 — Escala (Futuro)
+### 🔲 Fase 3 — Gestão (Próximo+)
+- [ ] Notificações push (SSE ou Web Push)
+- [ ] Impressão automática de pedidos
+- [ ] Copy do cardápio entre lojas
+- [ ] Importação em massa CSV
+
+### 🔲 Fase 4 — Escala (Futuro)
 - [ ] Docker Compose + CI/CD
 - [ ] S3/CDN para uploads
 - [ ] E2E frontend (Playwright)
 - [ ] SEO/SSR para páginas públicas
-- [ ] Notificações push

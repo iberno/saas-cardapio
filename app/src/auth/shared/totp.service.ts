@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { authenticator } from 'otplib';
+import { verify, generateSecret, generateURI } from 'otplib';
 import * as crypto from 'crypto';
 
 // In-memory pre-auth tokens (single-process, volatil)
@@ -7,18 +7,15 @@ const preAuthStore = new Map<string, { userId: string; tenantId?: string; expire
 
 @Injectable()
 export class TotpService {
-  constructor() {
-    authenticator.options = { step: 30, window: 1 };
-  }
-
   generateSecret(email: string, issuer = 'SaaS Cardápio'): { secret: string; url: string } {
-    const secret = authenticator.generateSecret();
-    const url = authenticator.keyuri(email, issuer, secret);
+    const secret = generateSecret();
+    const url = generateURI({ issuer, label: email, secret });
     return { secret, url };
   }
 
-  verify(code: string, secret: string): boolean {
-    return authenticator.check(code, secret);
+  async verify(code: string, secret: string): Promise<boolean> {
+    try { const r = await verify({ token: code, secret }); return r.valid; }
+    catch { return false; }
   }
 
   createPreAuthToken(userId: string, tenantId?: string): string {

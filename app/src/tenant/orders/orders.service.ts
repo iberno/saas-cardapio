@@ -125,6 +125,35 @@ export class OrdersService {
     });
   }
 
+  toCsv(orders: any[]): string {
+    const header = 'ID,Cliente,Telefone,Status,Total,Itens,Data,Observação\n';
+    const rows = orders.map((o) => {
+      const itemsDesc = o.items
+        .map((i: any) => {
+          const addonsText = i.addons.length
+            ? ` (${i.addons.map((a: any) => a.addonName).join(', ')})`
+            : '';
+          return `${i.quantity}x ${i.productName}${addonsText}`;
+        })
+        .join(' | ');
+      const cliente = o.customer?.name || o.customerName || '';
+      const telefone = o.customer?.phone || o.customerPhone || '';
+      const data = new Date(o.createdAt).toLocaleString('pt-BR');
+      const statusMap: Record<string, string> = {
+        PENDING: 'Pendente',
+        PREPARING: 'Preparando',
+        DELIVERING: 'Saiu para entrega',
+        DELIVERED: 'Entregue',
+        CANCELLED: 'Cancelado',
+      };
+      const status = statusMap[o.status] || o.status;
+      const total = Number(o.total).toFixed(2);
+      const notes = (o.notes || '').replace(/"/g, '""');
+      return `"${o.id}","${cliente}","${telefone}","${status}","${total}","${itemsDesc}","${data}","${notes}"`;
+    });
+    return header + rows.join('\n');
+  }
+
   private async awardPointsIfEnabled(tenantId: string, customerId: string | undefined, total: number) {
     if (!customerId) return;
     const tenant = await this.prisma.tenant.findUnique({

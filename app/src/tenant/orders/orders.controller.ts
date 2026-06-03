@@ -7,7 +7,9 @@ import {
   Body,
   Query,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -21,6 +23,15 @@ export class OrdersController {
   @Get()
   findAll(@Param('tenantId') tenantId: string, @Query('status') status?: string) {
     return this.service.findAll(tenantId, status);
+  }
+
+  @Get('export')
+  async exportCsv(@Param('tenantId') tenantId: string, @Query('status') status: string | undefined, @Res() res: Response) {
+    const orders = await this.service.findAll(tenantId, status);
+    const csv = this.service.toCsv(orders);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="pedidos-${tenantId.slice(0, 8)}.csv"`);
+    res.send('\uFEFF' + csv);
   }
 
   @Get(':id')

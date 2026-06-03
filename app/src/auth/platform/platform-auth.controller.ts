@@ -25,10 +25,11 @@ export class PlatformAuthController {
     const ip = req.ip || '';
     const ua = req.headers['user-agent'];
     const result = await this.service.login(dto.email, dto.password, ip, ua);
-    if (result.type === 'totp_required') {
+    if ('type' in result && result.type === 'totp_required') {
       return { requiresTotp: true, preAuthToken: result.preAuthToken };
     }
-    setCookies(res, result.accessToken, result.refreshToken, 'pa_session', 'platform');
+    const session = result as { accessToken: string; refreshToken: string };
+    setCookies(res, session.accessToken, session.refreshToken, 'pa_session', 'platform');
     return { message: 'Authenticated' };
   }
 

@@ -57,7 +57,7 @@ export class PlatformAuthService {
     const { userId } = this.totp.consumePreAuthToken(preAuthToken);
     const admin = await this.prisma.platformAdmin.findUnique({ where: { id: userId } });
     if (!admin || !admin.totpSecret) throw new BadRequestException('TOTP não configurado');
-    if (!this.totp.verify(code, admin.totpSecret)) throw new BadRequestException('Código inválido');
+    if (!await this.totp.verify(code, admin.totpSecret)) throw new BadRequestException('Código inválido');
     return this.createSession(admin.id, 'PLATFORM_ADMIN', ip, userAgent);
   }
 
@@ -75,7 +75,7 @@ export class PlatformAuthService {
   async enableTotp(adminId: string, code: string) {
     const admin = await this.prisma.platformAdmin.findUnique({ where: { id: adminId } });
     if (!admin || !admin.totpSecret) throw new BadRequestException('TOTP não configurado');
-    if (!this.totp.verify(code, admin.totpSecret)) throw new BadRequestException('Código inválido');
+    if (!await this.totp.verify(code, admin.totpSecret)) throw new BadRequestException('Código inválido');
     await this.prisma.platformAdmin.update({
       where: { id: adminId },
       data: { totpEnabled: true },

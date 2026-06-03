@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet } from '@tanstack/react-router'
-import { Menu } from 'lucide-react'
+import { Menu, ExternalLink } from 'lucide-react'
 import { AdminSidebar } from './AdminSidebar'
 import { useAuth } from '../../lib/auth-context'
 import type { TenantUser, PlatformUser } from '../../types'
@@ -22,6 +22,8 @@ export function AdminLayout() {
       ? (user as TenantUser).name
       : (user as PlatformUser).email
     : ''
+
+  const tenantSlug = user && 'slug' in user ? (user as TenantUser).slug : null
 
   return (
     <div className="min-h-screen bg-base-200 flex">
@@ -49,6 +51,17 @@ export function AdminLayout() {
             <Menu size={24} />
           </button>
           <div className="flex items-center gap-3 ml-auto">
+            {tenantSlug && (
+              <a
+                href={`/loja/${tenantSlug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost btn-sm text-white/60 hover:text-white gap-1"
+              >
+                <ExternalLink size={14} />
+                Visualizar Cardápio
+              </a>
+            )}
             <span className="text-sm text-white/60">{displayName}</span>
           </div>
         </header>

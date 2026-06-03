@@ -85,3 +85,18 @@ export async function updateOrderStatus(tenantId: string, id: string, status: Or
 export async function cancelOrder(tenantId: string, id: string): Promise<Order> {
   return api.put<Order>(`/tenants/${tenantId}/orders/${id}/cancel`)
 }
+
+export async function exportOrdersCsv(tenantId: string, status?: string): Promise<void> {
+  const params = status ? `?status=${status}` : ''
+  const res = await fetch(`/api/tenants/${tenantId}/orders/export${params}`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Falha ao exportar CSV')
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `pedidos-${tenantId.slice(0, 8)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}

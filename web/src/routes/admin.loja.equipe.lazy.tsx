@@ -1,5 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { useAuth } from '../lib/auth-context'
 import { listarStaff, criarStaff, atualizarStaff, excluirStaff, type CreateStaffRequest, type UpdateStaffRequest } from '../services/staff.service'
 import type { TenantUser } from '../types'
@@ -71,13 +72,16 @@ function EquipePage() {
         if (password) data.password = password
         const updated = await atualizarStaff(tenantId, editId, data)
         setStaff((prev) => prev.map((s) => (s.id === editId ? updated : s)))
+        toast.success('Membro atualizado')
       } else {
         const created = await criarStaff(tenantId, { email, password, name, role })
         setStaff((prev) => [...prev, created])
+        toast.success('Membro adicionado')
       }
       closeModal()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar')
+      toast.error(err instanceof Error ? err.message : 'Erro ao salvar')
     } finally {
       setSaving(false)
     }
@@ -88,10 +92,12 @@ function EquipePage() {
     try {
       await excluirStaff(tenantId, deleteTarget.id)
       setStaff((prev) => prev.filter((s) => s.id !== deleteTarget.id))
+      toast.success('Membro removido')
       setDeleteTarget(null)
       delRef.current?.close()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao remover')
+      toast.error(err instanceof Error ? err.message : 'Erro ao remover')
     }
   }
 

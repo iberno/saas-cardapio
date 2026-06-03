@@ -13,6 +13,7 @@ export interface TenantUser {
   role: 'OWNER' | 'STAFF'
   totpEnabled: boolean
   tenantId: string
+  slug: string
   createdAt: string
 }
 

@@ -63,7 +63,13 @@ saas-cardapio/
 - [x] Customização de cores (12 campos: primary, secondary, accent, neutral, base, conteúdo)
 - [x] Troca de tema claro/escuro (toggle global)
 - [x] Configurações (nome, telefone, endereço, Instagram, horários, pagamento, programa de pontos)
-- [x] Gestão de pedidos com polling, som de novo pedido, avanço de status, cancelamento, impressão de cupom
+- [x] Gestão de pedidos com polling, som de novo pedido, avanço de status, cancelamento, impressão de cupom, **export CSV**
+- [x] **Dashboard** com total/today orders, revenue, produtos, categorias, staff, pedidos recentes
+- [x] **Gestão de Equipe** — CRUD de staff (OWNER-only), roles OWNER/STAFF
+- [x] **Histórico de Auditoria** — Log de ações com paginação e filtro
+- [x] **2FA/TOTP** — Setup via QR code, enable/disable, login em 2 passos
+- [x] **Password Reset** — Fluxo completo de recuperação de senha
+- [x] **Sonner Toaster** + **Skeleton loading** em toda UI admin
 
 ### Público — `/loja/:slug`
 - [x] Cardápio online com tema customizado da loja aplicado automaticamente
@@ -133,13 +139,18 @@ Login por telefone no modal
 
 ## Testes
 
-33 testes e2e no backend:
+75 testes e2e no backend:
 
 | Grupo | Qtd | Cobre |
 |-------|-----|-------|
 | Auth | 17 | Login/logout/refresh/me — platform, tenant, customer |
 | Segurança | 10 | CSRF, rate limiting, brute-force lockout |
 | Multi-tenancy | 6 | Isolamento entre tenants, SKIP_PATHS |
+| Store Content | 20 | Produtos, categorias, variantes, grupos, banners, upload |
+| Pedidos (Orders) | 8 | CRUD, status, cancelamento, auth |
+| Staff | 8 | CRUD, email duplicado, auth |
+| Settings | 3 | Get, put, reflect |
+| Platform Tenants | 3 | Criação de tenant com/sem owner |
 
 ```bash
 cd app

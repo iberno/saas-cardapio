@@ -25,10 +25,11 @@ export class TenantUserAuthController {
     const ip = req.ip || '';
     const ua = req.headers['user-agent'];
     const result = await this.service.login(dto.email, dto.password, ip, ua, dto.slug);
-    if (result.type === 'totp_required') {
+    if ('type' in result && result.type === 'totp_required') {
       return { requiresTotp: true, preAuthToken: result.preAuthToken };
     }
-    setTenantUserCookies(res, result.accessToken, result.refreshToken);
+    const session = result as { accessToken: string; refreshToken: string };
+    setTenantUserCookies(res, session.accessToken, session.refreshToken);
     return { message: 'Authenticated' };
   }
 

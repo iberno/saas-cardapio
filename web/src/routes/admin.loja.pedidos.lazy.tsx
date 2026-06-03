@@ -1,11 +1,11 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../lib/auth-context'
-import { listarOrders, updateOrderStatus, cancelOrder, getOrder, type Order, type OrderStatus, STATUS_LABELS, STATUS_FLOW } from '../services/orders.service'
+import { listarOrders, updateOrderStatus, cancelOrder, getOrder, exportOrdersCsv, type Order, type OrderStatus, STATUS_LABELS, STATUS_FLOW } from '../services/orders.service'
 import { getSettings, type StoreSettings } from '../services/settings.service'
 import { playNewOrderSound } from '../lib/sound'
 import { printReceipt } from '../lib/print-receipt'
-import { ChefHat, Printer, XCircle, RefreshCw } from 'lucide-react'
+import { ChefHat, Printer, XCircle, RefreshCw, Download } from 'lucide-react'
 
 export const Route = createLazyFileRoute('/admin/loja/pedidos')({
   component: PedidosPage,
@@ -103,9 +103,14 @@ function PedidosPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Pedidos</h1>
-        <button onClick={load} className="btn btn-ghost btn-sm gap-1">
-          <RefreshCw size={16} /> Atualizar
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => exportOrdersCsv(tenantId!, statusFilter || undefined)} className="btn btn-ghost btn-sm gap-1">
+            <Download size={16} /> Exportar CSV
+          </button>
+          <button onClick={load} className="btn btn-ghost btn-sm gap-1">
+            <RefreshCw size={16} /> Atualizar
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-2 mb-4 flex-wrap">

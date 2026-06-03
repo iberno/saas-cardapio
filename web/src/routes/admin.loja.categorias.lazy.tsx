@@ -1,5 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { useAuth } from '../lib/auth-context'
 import { listarCategorias, criarCategoria, atualizarCategoria, excluirCategoria } from '../services/categorias.service'
 import { listarProdutos } from '../services/produtos.service'
@@ -75,23 +76,32 @@ function CategoriasPage() {
     try {
       if (editId) {
         await atualizarCategoria(tenantId, editId, { nome })
+        toast.success('Categoria atualizada')
       } else {
         await criarCategoria(tenantId, { nome })
+        toast.success('Categoria criada')
       }
       closeModal()
       load()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar')
+      const msg = err instanceof Error ? err.message : 'Erro ao salvar'
+      setError(msg)
+      toast.error(msg)
     }
     setSaving(false)
   }
 
   const handleDelete = async () => {
     if (!tenantId || !deleteTarget) return
-    await excluirCategoria(tenantId, deleteTarget.id)
-    setDeleteTarget(null)
-    delRef.current?.close()
-    load()
+    try {
+      await excluirCategoria(tenantId, deleteTarget.id)
+      toast.success('Categoria excluída')
+      setDeleteTarget(null)
+      delRef.current?.close()
+      load()
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao excluir')
+    }
   }
 
   if (!tenantId) {

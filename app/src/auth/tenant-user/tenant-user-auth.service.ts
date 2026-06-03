@@ -76,12 +76,12 @@ export class TenantUserAuthService {
     const { userId, tenantId } = this.totp.consumePreAuthToken(preAuthToken);
     const user = await this.prisma.tenantUser.findUnique({ where: { id: userId } });
     if (!user || !user.totpSecret) throw new BadRequestException('TOTP não configurado');
-    if (!this.totp.verify(code, user.totpSecret)) throw new BadRequestException('Código inválido');
+    if (!await this.totp.verify(code, user.totpSecret)) throw new BadRequestException('Código inválido');
     return this.createSession(user, tenantId!, ip, userAgent);
   }
 
   async setupTotp(userId: string) {
-    const user = await this.prisma.tenantUser.findUnique({ where: { id: userId } });
+    const user = await this.prisma.tenantUser.findUnique({ where: { id: userId }, include: { tenant: { select: { name: true } } } });
     if (!user) throw new BadRequestException('Usuário não encontrado');
     const { secret, url } = this.totp.generateSecret(user.email, user.tenant?.name || 'SaaS Cardápio');
     await this.prisma.tenantUser.update({
@@ -94,7 +94,7 @@ export class TenantUserAuthService {
   async enableTotp(userId: string, code: string) {
     const user = await this.prisma.tenantUser.findUnique({ where: { id: userId } });
     if (!user || !user.totpSecret) throw new BadRequestException('TOTP não configurado');
-    if (!this.totp.verify(code, user.totpSecret)) throw new BadRequestException('Código inválido');
+    if (!await this.totp.verify(code, user.totpSecret)) throw new BadRequestException('Código inválido');
     await this.prisma.tenantUser.update({
       where: { id: userId },
       data: { totpEnabled: true },
@@ -133,10 +133,13 @@ export class TenantUserAuthService {
   }
 
   async me(userId: string, tenantId: string) {
-    return this.prisma.tenantUser.findUnique({
+    const user = await this.prisma.tenantUser.findUnique({
       where: { id: userId, tenantId },
-      select: { id: true, email: true, name: true, role: true, totpEnabled: true, tenantId: true, createdAt: true },
+      select: { id: true, email: true, name: true, role: true, totpEnabled: true, tenantId: true, tenant: { select: { slug: true } }, createdAt: true },
     });
+    if (!user) return null
+    const { tenant, ...rest } = user
+    return { ...rest, slug: tenant.slug }
   }
 
   private async createSession(user: any, tenantId: string, ip: string, userAgent?: string) {
