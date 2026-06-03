@@ -1,4 +1,5 @@
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { Header, Footer } from '../components/layout'
 import { Bot, TrendingUp, BarChart3, BotMessageSquare, Smartphone, CreditCard, Calendar, Send, Heart } from 'lucide-react'
 
@@ -6,9 +7,25 @@ export const Route = createLazyFileRoute('/')({
   component: LandingPage,
 })
 
+function SubdomainRedirect() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    const host = window.location.hostname
+    const base = import.meta.env.VITE_DOMAIN_BASE || 'saas-cardapio.local'
+    const match = host.match(new RegExp(`^([a-z0-9-]+)\\.${base.replaceAll('.', '\\.')}$`))
+    if (match) {
+      const slug = match[1]
+      navigate({ to: '/loja/$slug', params: { slug }, replace: true })
+    }
+  }, [navigate])
+  return null
+}
+
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-neutral text-base-content">
+    <>
+      <SubdomainRedirect />
+      <div className="min-h-screen bg-neutral text-base-content">
       <Header />
 
       <section className="pt-24 pb-16 px-4 bg-gradient-to-b from-primary to-neutral">
@@ -107,5 +124,6 @@ function LandingPage() {
 
       <Footer />
     </div>
+    </>
   )
 }

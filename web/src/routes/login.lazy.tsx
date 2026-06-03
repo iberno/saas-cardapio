@@ -1,7 +1,7 @@
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { createLazyFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../lib/auth-context'
-import { LogIn } from 'lucide-react'
+import { LogIn, Shield } from 'lucide-react'
 
 export const Route = createLazyFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -11,7 +11,7 @@ export const Route = createLazyFileRoute('/login')({
 })
 
 function LoginPage() {
-  const { login, user, isPlatform } = useAuth()
+  const { login, user, isPlatform, verifyTotpLogin } = useAuth()
   const navigate = useNavigate()
   const { redirect: redirectUrl } = Route.useSearch()
   const [email, setEmail] = useState('')
@@ -20,6 +20,8 @@ function LoginPage() {
   const [type, setType] = useState<'platform' | 'tenant'>('platform')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [preAuthToken, setPreAuthToken] = useState<string | null>(null)
+  const [totpCode, setTotpCode] = useState('')
 
   useEffect(() => {
     if (!user) return
@@ -28,15 +30,76 @@ function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (preAuthToken) {
+      setError('')
+      setLoading(true)
+      try {
+        await verifyTotpLogin(preAuthToken, totpCode)
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Código inválido')
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
     setError('')
     setLoading(true)
     try {
-      await login(email, password, type, slug || undefined)
+      const result = await login(email, password, type, slug || undefined)
+      if (result?.requiresTotp) {
+        setPreAuthToken(result.preAuthToken)
+        setTotpCode('')
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Falha ao autenticar')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (preAuthToken) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
+        <div className="rounded-xl border border-base-300 p-6 bg-base-100 w-full max-w-sm">
+          <div className="text-center mb-6">
+            <Shield className="mx-auto mb-2 text-accent" size={40} />
+            <h1 className="text-2xl font-bold">Autenticação em duas etapas</h1>
+            <p className="text-sm opacity-60 mt-1">Digite o código do seu aplicativo autenticador</p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Código de 6 dígitos</legend>
+              <input
+                className="input w-full text-center text-2xl tracking-widest"
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="000000"
+                value={totpCode}
+                onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                required
+                autoFocus
+              />
+            </fieldset>
+            {error && <p className="text-error text-sm">{error}</p>}
+            <button type="submit" className="btn btn-primary w-full" disabled={loading || totpCode.length < 6}>
+              {loading ? <span className="loading loading-spinner" /> : <Shield size={16} />}
+              Verificar
+            </button>
+            <div className="text-center">
+              <button
+                type="button"
+                className="link text-sm"
+                onClick={() => { setPreAuthToken(null); setError('') }}
+              >
+                Voltar ao login
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -70,6 +133,9 @@ function LoginPage() {
             {loading ? <span className="loading loading-spinner" /> : <LogIn size={16} />}
             Entrar
           </button>
+          <div className="text-center">
+            <Link to="/esqueci-senha" className="link text-sm">Esqueci minha senha</Link>
+          </div>
         </form>
       </div>
     </div>

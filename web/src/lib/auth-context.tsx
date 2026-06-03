@@ -4,9 +4,11 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from 'react'
 import { api } from './api-client'
+import { loginTotp } from '../services/auth.service'
 import type { PlatformUser, TenantUser } from '../types'
 
 type User = PlatformUser | TenantUser | null
@@ -15,7 +17,8 @@ interface AuthContextValue {
   user: User
   loading: boolean
   isPlatform: boolean
-  login: (email: string, password: string, type: 'platform' | 'tenant', slug?: string) => Promise<void>
+  login: (email: string, password: string, type: 'platform' | 'tenant', slug?: string) => Promise<{ requiresTotp: true; preAuthToken: string } | void>
+  verifyTotpLogin: (preAuthToken: string, code: string) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -25,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(null)
   const [loading, setLoading] = useState(true)
   const [authType, setAuthType] = useState<'platform' | 'tenant' | null>(null)
+  const pendingAuthType = useRef<'platform' | 'tenant'>('tenant')
 
   const fetchUser = useCallback(async () => {
     try {
@@ -52,7 +56,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const endpoint = type === 'platform' ? '/platform/auth/login' : '/tenant/auth/login'
       const body: Record<string, string> = { email, password }
       if (slug) body.slug = slug
-      await api.post<{ message: string }>(endpoint, body)
+      const result = await api.post<{ message?: string; requiresTotp?: true; preAuthToken?: string }>(endpoint, body)
+      if (result.requiresTotp && result.preAuthToken) {
+        pendingAuthType.current = type
+        return { requiresTotp: true as const, preAuthToken: result.preAuthToken }
+      }
+      await fetchUser()
+    },
+    [fetchUser],
+  )
+
+  useEffect(() => {
+    const handler = () => {
+      if (window.location.pathname === '/login') return
+      setUser(null)
+      setAuthType(null)
+      window.location.href = '/login'
+    }
+    window.addEventListener('auth-expired', handler)
+    return () => window.removeEventListener('auth-expired', handler)
+  }, [])
+
+  const verifyTotpLogin = useCallback(
+    async (preAuthToken: string, code: string) => {
+      await loginTotp(preAuthToken, code, pendingAuthType.current)
       await fetchUser()
     },
     [fetchUser],
@@ -72,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [authType])
 
   return (
-    <AuthContext.Provider value={{ user, loading, isPlatform: authType === 'platform', login, logout }}>
+    <AuthContext.Provider value={{ user, loading, isPlatform: authType === 'platform', login, verifyTotpLogin, logout }}>
       {children}
     </AuthContext.Provider>
   )

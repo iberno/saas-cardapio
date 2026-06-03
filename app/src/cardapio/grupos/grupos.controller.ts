@@ -6,82 +6,58 @@ import {
   Delete,
   Param,
   Body,
-  Req,
-  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { GruposService } from './grupos.service';
-import { TokenService } from '../../auth/shared/token.service';
+import { TenantOrPlatformGuard } from '../../common/guards/tenant-or-platform.guard';
 import { CreateGrupoDto } from './dto/create-grupo.dto';
 import { UpdateGrupoDto } from './dto/update-grupo.dto';
 import { CreateGrupoItemDto } from './dto/create-grupo-item.dto';
 import { UpdateGrupoItemDto } from './dto/update-grupo-item.dto';
 
+@UseGuards(TenantOrPlatformGuard)
 @Controller('tenants/:tenantId/produtos/:produtoId/grupos')
 export class GruposController {
-  constructor(
-    private service: GruposService,
-    private tokenService: TokenService,
-  ) {}
-
-  private verifyAuth(cookies: Record<string, string> | undefined) {
-    const token = cookies?.tu_session || cookies?.pa_session;
-    if (!token) throw new UnauthorizedException();
-    this.tokenService.verifyAccessToken(token);
-  }
+  constructor(private service: GruposService) {}
 
   @Get()
-  findAll(@Param('produtoId') produtoId: string, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  findAll(@Param('produtoId') produtoId: string) {
     return this.service.findAll(produtoId);
   }
 
   @Post()
-  create(@Param('produtoId') produtoId: string, @Body() dto: CreateGrupoDto, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  create(@Param('produtoId') produtoId: string, @Body() dto: CreateGrupoDto) {
     return this.service.create(produtoId, dto);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateGrupoDto, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  update(@Param('id') id: string, @Body() dto: UpdateGrupoDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  remove(@Param('id') id: string) {
     return this.service.remove(id);
   }
 }
 
+@UseGuards(TenantOrPlatformGuard)
 @Controller('tenants/:tenantId/grupos/:grupoId/itens')
 export class GrupoItensController {
-  constructor(
-    private service: GruposService,
-    private tokenService: TokenService,
-  ) {}
-
-  private verifyAuth(cookies: Record<string, string> | undefined) {
-    const token = cookies?.tu_session || cookies?.pa_session;
-    if (!token) throw new UnauthorizedException();
-    this.tokenService.verifyAccessToken(token);
-  }
+  constructor(private service: GruposService) {}
 
   @Post()
-  criarItem(@Param('grupoId') grupoId: string, @Body() dto: CreateGrupoItemDto, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  criarItem(@Param('grupoId') grupoId: string, @Body() dto: CreateGrupoItemDto) {
     return this.service.criarItem(grupoId, dto);
   }
 
   @Patch(':id')
-  atualizarItem(@Param('id') id: string, @Body() dto: UpdateGrupoItemDto, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  atualizarItem(@Param('id') id: string, @Body() dto: UpdateGrupoItemDto) {
     return this.service.atualizarItem(id, dto);
   }
 
   @Delete(':id')
-  removerItem(@Param('id') id: string, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  removerItem(@Param('id') id: string) {
     return this.service.removerItem(id);
   }
 }

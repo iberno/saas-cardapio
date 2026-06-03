@@ -1,6 +1,7 @@
 const BASE_URL = '/api'
 
 let csrfToken: string | null = null
+let refreshing: Promise<boolean> | null = null
 
 export async function obtainCsrf(): Promise<string> {
   if (csrfToken) return csrfToken
@@ -12,6 +13,27 @@ export async function obtainCsrf(): Promise<string> {
   const data = await res.json()
   csrfToken = data.csrfToken
   return csrfToken!
+}
+
+async function attemptRefresh(): Promise<boolean> {
+  if (refreshing) return refreshing
+  refreshing = (async () => {
+    const token = await obtainCsrf()
+    for (const endpoint of ['/platform/auth/refresh', '/tenant/auth/refresh', '/customer/auth/refresh']) {
+      const res = await fetch(`${BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
+        credentials: 'include',
+      })
+      if (res.ok) return true
+    }
+    return false
+  })()
+  try {
+    return await refreshing
+  } finally {
+    refreshing = null
+  }
 }
 
 export class ApiError extends Error {
@@ -68,6 +90,31 @@ async function request<T>(
       const err2 = await safeParseError(retry)
       throw new ApiError(retry.status, err2.message || 'Request failed')
     }
+
+    if (res.status === 401) {
+      const refreshed = await attemptRefresh()
+      if (refreshed) {
+        if (method !== 'GET' && method !== 'HEAD') {
+          csrfToken = null
+          headers['X-CSRF-Token'] = await obtainCsrf()
+        }
+        const retry = await fetch(`${BASE_URL}${path}`, {
+          method, headers, credentials: 'include',
+          body: body !== undefined ? JSON.stringify(body) : undefined,
+        })
+        if (retry.ok) {
+          if (retry.status === 204) return undefined as T
+          const body = await retry.text()
+          return body ? JSON.parse(body) : undefined as T
+        }
+        const err2 = await safeParseError(retry)
+        throw new ApiError(retry.status, err2.message || 'Request failed')
+      }
+      if (method !== 'GET' && !path.endsWith('/login')) {
+        window.dispatchEvent(new CustomEvent('auth-expired'))
+      }
+    }
+
     const err = await safeParseError(res)
     throw new ApiError(res.status, err.message || 'Request failed')
   }

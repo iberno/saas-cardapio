@@ -31,11 +31,11 @@ export class CardapioService {
     if (params.categoria) where.categoria = params.categoria;
 
     const [data, total] = await Promise.all([
-      this.prisma.platform().produto.findMany({
+      this.prisma.scoped.produto.findMany({
         where, skip, take: limit, orderBy,
         include: { variantes: true, categoriaCardapio: true },
       }),
-      this.prisma.platform().produto.count({ where }),
+      this.prisma.scoped.produto.count({ where }),
     ]);
 
     const dataWithPreco = data.map((produto) => {
@@ -50,7 +50,7 @@ export class CardapioService {
   }
 
   async findOne(tenantId: string, id: string) {
-    const produto = await this.prisma.platform().produto.findFirst({
+    const produto = await this.prisma.scoped.produto.findFirst({
       where: { id, tenantId },
       include: { variantes: true, categoriaCardapio: true },
     });
@@ -66,18 +66,18 @@ export class CardapioService {
     const data: any = { ...dto, tenantId };
     data.preco = dto.preco !== undefined ? new Prisma.Decimal(dto.preco) : new Prisma.Decimal(0);
     data.categoria = dto.categoria ?? 'BEBIDAS';
-    return this.prisma.platform().produto.create({ data });
+    return this.prisma.scoped.produto.create({ data });
   }
 
   async update(tenantId: string, id: string, dto: UpdateProdutoDto) {
     await this.findOne(tenantId, id);
     const data: any = { ...dto };
     if (dto.preco !== undefined) data.preco = new Prisma.Decimal(dto.preco);
-    return this.prisma.platform().produto.update({ where: { id }, data });
+    return this.prisma.scoped.produto.update({ where: { id, tenantId }, data });
   }
 
   async remove(tenantId: string, id: string) {
     await this.findOne(tenantId, id);
-    return this.prisma.platform().produto.delete({ where: { id } });
+    return this.prisma.scoped.produto.delete({ where: { id, tenantId } });
   }
 }

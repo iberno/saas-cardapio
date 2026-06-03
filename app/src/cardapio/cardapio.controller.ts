@@ -8,27 +8,17 @@ import {
   Body,
   Query,
   UseGuards,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { CardapioService } from './cardapio.service';
 import { CreateProdutoDto } from './dto/create-produto.dto';
 import { UpdateProdutoDto } from './dto/update-produto.dto';
-import { TokenService } from '../auth/shared/token.service';
+import { TenantOrPlatformGuard } from '../common/guards/tenant-or-platform.guard';
 import { Categoria } from '@prisma/client';
 
+@UseGuards(TenantOrPlatformGuard)
 @Controller('tenants/:tenantId/produtos')
 export class CardapioController {
-  constructor(
-    private service: CardapioService,
-    private tokenService: TokenService,
-  ) {}
-
-  private verifyAuth(cookies: Record<string, string> | undefined) {
-    const token = cookies?.tu_session || cookies?.pa_session;
-    if (!token) throw new UnauthorizedException();
-    const payload = this.tokenService.verifyAccessToken(token);
-    return payload;
-  }
+  constructor(private service: CardapioService) {}
 
   @Get()
   findAll(
@@ -52,10 +42,7 @@ export class CardapioController {
   }
 
   @Post()
-  create(
-    @Param('tenantId') tenantId: string,
-    @Body() dto: CreateProdutoDto,
-  ) {
+  create(@Param('tenantId') tenantId: string, @Body() dto: CreateProdutoDto) {
     return this.service.create(tenantId, dto);
   }
 

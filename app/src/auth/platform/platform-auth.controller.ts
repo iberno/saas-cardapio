@@ -1,13 +1,19 @@
-import { Controller, Post, Get, Body, Req, Res, UseGuards, HttpCode } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, Res, UseGuards, HttpCode, UnauthorizedException } from '@nestjs/common';
 import { PlatformAuthService } from './platform-auth.service';
+import { PasswordResetService } from '../shared/password-reset.service';
 import { PlatformLoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from '../shared/dto/forgot-password.dto';
+import { ResetPasswordDto } from '../shared/dto/reset-password.dto';
 import { PlatformAuthGuard } from '../../common/guards/platform-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Response, Request } from 'express';
 
 @Controller('platform/auth')
 export class PlatformAuthController {
-  constructor(private service: PlatformAuthService) {}
+  constructor(
+    private service: PlatformAuthService,
+    private passwordReset: PasswordResetService,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -18,7 +24,24 @@ export class PlatformAuthController {
   ) {
     const ip = req.ip || '';
     const ua = req.headers['user-agent'];
-    const { accessToken, refreshToken } = await this.service.login(dto.email, dto.password, ip, ua);
+    const result = await this.service.login(dto.email, dto.password, ip, ua);
+    if (result.type === 'totp_required') {
+      return { requiresTotp: true, preAuthToken: result.preAuthToken };
+    }
+    setCookies(res, result.accessToken, result.refreshToken, 'pa_session', 'platform');
+    return { message: 'Authenticated' };
+  }
+
+  @Post('login/totp')
+  @HttpCode(200)
+  async loginTotp(
+    @Body() body: { preAuthToken: string; code: string },
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const ip = req.ip || '';
+    const ua = req.headers['user-agent'];
+    const { accessToken, refreshToken } = await this.service.verifyTotpLogin(body.preAuthToken, body.code, ip, ua);
     setCookies(res, accessToken, refreshToken, 'pa_session', 'platform');
     return { message: 'Authenticated' };
   }
@@ -32,6 +55,39 @@ export class PlatformAuthController {
     const { accessToken, refreshToken } = await this.service.refresh(token, ip, ua);
     setCookies(res, accessToken, refreshToken, 'pa_session', 'platform');
     return { message: 'Refreshed' };
+  }
+
+  @Post('forgot-password')
+  @HttpCode(200)
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.passwordReset.requestReset(dto.email, 'PLATFORM_ADMIN');
+  }
+
+  @Post('reset-password')
+  @HttpCode(200)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.passwordReset.resetPassword(dto.token, dto.newPassword, 'PLATFORM_ADMIN');
+  }
+
+  @UseGuards(PlatformAuthGuard)
+  @Post('totp/setup')
+  @HttpCode(200)
+  async setupTotp(@CurrentUser() user: any) {
+    return this.service.setupTotp(user.sub);
+  }
+
+  @UseGuards(PlatformAuthGuard)
+  @Post('totp/enable')
+  @HttpCode(200)
+  async enableTotp(@CurrentUser() user: any, @Body() body: { code: string }) {
+    return this.service.enableTotp(user.sub, body.code);
+  }
+
+  @UseGuards(PlatformAuthGuard)
+  @Post('totp/disable')
+  @HttpCode(200)
+  async disableTotp(@CurrentUser() user: any) {
+    return this.service.disableTotp(user.sub);
   }
 
   @UseGuards(PlatformAuthGuard)

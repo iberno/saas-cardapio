@@ -5,6 +5,10 @@ import { AuthProvider, useAuth } from './lib/auth-context'
 import { routeTree } from './routeTree.gen'
 import './index.css'
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+}
+
 const router = createRouter({
   routeTree,
   context: { isAuthenticated: false, authLoading: true },

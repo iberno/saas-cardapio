@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { Store, ClipboardList, LayoutDashboard, LogOut, X, Palette, FolderTree, Image, Images } from 'lucide-react'
+import { Store, ClipboardList, LayoutDashboard, LogOut, X, Palette, FolderTree, Image, Images, Settings, ShoppingCart, Shield, Users } from 'lucide-react'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '../../lib/auth-context'
@@ -23,6 +23,12 @@ const navItems: NavItem[] = [
     path: '/admin/lojas',
     icon: Store,
     showFor: 'platform',
+  },
+  {
+    label: 'Pedidos',
+    path: '/admin/loja/pedidos',
+    icon: ShoppingCart,
+    showFor: 'tenant',
   },
   {
     label: 'Cardápio',
@@ -52,6 +58,24 @@ const navItems: NavItem[] = [
     label: 'Galeria',
     path: '/admin/loja/galeria',
     icon: Images,
+    showFor: 'tenant',
+  },
+  {
+    label: 'Configurações',
+    path: '/admin/loja/configuracoes',
+    icon: Settings,
+    showFor: 'tenant',
+  },
+  {
+    label: 'Segurança',
+    path: '/admin/loja/seguranca',
+    icon: Shield,
+    showFor: 'tenant',
+  },
+  {
+    label: 'Equipe',
+    path: '/admin/loja/equipe',
+    icon: Users,
     showFor: 'tenant',
   },
 ]

@@ -20,6 +20,10 @@ export class UpdateProdutoDto {
   categoria?: Categoria;
 
   @IsOptional()
+  @IsString()
+  categoriaId?: string;
+
+  @IsOptional()
   @IsBoolean()
   disponivel?: boolean;
 

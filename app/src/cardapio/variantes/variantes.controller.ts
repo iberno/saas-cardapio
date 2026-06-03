@@ -6,48 +6,35 @@ import {
   Delete,
   Param,
   Body,
-  Req,
-  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { VariantesService } from './variantes.service';
-import { TokenService } from '../../auth/shared/token.service';
+import { TenantOrPlatformGuard } from '../../common/guards/tenant-or-platform.guard';
 import { CreateVarianteDto } from './dto/create-variante.dto';
 import { UpdateVarianteDto } from './dto/update-variante.dto';
 
+@UseGuards(TenantOrPlatformGuard)
 @Controller('tenants/:tenantId/produtos/:produtoId/variantes')
 export class VariantesController {
-  constructor(
-    private service: VariantesService,
-    private tokenService: TokenService,
-  ) {}
-
-  private verifyAuth(cookies: Record<string, string> | undefined) {
-    const token = cookies?.tu_session || cookies?.pa_session;
-    if (!token) throw new UnauthorizedException();
-    this.tokenService.verifyAccessToken(token);
-  }
+  constructor(private service: VariantesService) {}
 
   @Get()
-  findAll(@Param('produtoId') produtoId: string, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  findAll(@Param('produtoId') produtoId: string) {
     return this.service.findAll(produtoId);
   }
 
   @Post()
-  create(@Param('produtoId') produtoId: string, @Body() dto: CreateVarianteDto, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  create(@Param('produtoId') produtoId: string, @Body() dto: CreateVarianteDto) {
     return this.service.create(produtoId, dto);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateVarianteDto, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  update(@Param('id') id: string, @Body() dto: UpdateVarianteDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req: any) {
-    this.verifyAuth(req.cookies);
+  remove(@Param('id') id: string) {
     return this.service.remove(id);
   }
 }

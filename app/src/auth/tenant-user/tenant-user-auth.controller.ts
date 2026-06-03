@@ -1,13 +1,19 @@
 import { Controller, Post, Get, Body, Req, Res, UseGuards, HttpCode } from '@nestjs/common';
 import { TenantUserAuthService } from './tenant-user-auth.service';
+import { PasswordResetService } from '../shared/password-reset.service';
 import { TenantUserLoginDto } from './dto/tenant-user-login.dto';
+import { ForgotPasswordDto } from '../shared/dto/forgot-password.dto';
+import { ResetPasswordDto } from '../shared/dto/reset-password.dto';
 import { TenantUserAuthGuard } from '../../common/guards/tenant-user-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Response, Request } from 'express';
 
 @Controller('tenant/auth')
 export class TenantUserAuthController {
-  constructor(private service: TenantUserAuthService) {}
+  constructor(
+    private service: TenantUserAuthService,
+    private passwordReset: PasswordResetService,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -18,7 +24,24 @@ export class TenantUserAuthController {
   ) {
     const ip = req.ip || '';
     const ua = req.headers['user-agent'];
-    const { accessToken, refreshToken } = await this.service.login(dto.email, dto.password, ip, ua, dto.slug);
+    const result = await this.service.login(dto.email, dto.password, ip, ua, dto.slug);
+    if (result.type === 'totp_required') {
+      return { requiresTotp: true, preAuthToken: result.preAuthToken };
+    }
+    setTenantUserCookies(res, result.accessToken, result.refreshToken);
+    return { message: 'Authenticated' };
+  }
+
+  @Post('login/totp')
+  @HttpCode(200)
+  async loginTotp(
+    @Body() body: { preAuthToken: string; code: string },
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const ip = req.ip || '';
+    const ua = req.headers['user-agent'];
+    const { accessToken, refreshToken } = await this.service.verifyTotpLogin(body.preAuthToken, body.code, ip, ua);
     setTenantUserCookies(res, accessToken, refreshToken);
     return { message: 'Authenticated' };
   }
@@ -32,6 +55,39 @@ export class TenantUserAuthController {
     const { accessToken, refreshToken } = await this.service.refresh(token, ip, ua);
     setTenantUserCookies(res, accessToken, refreshToken);
     return { message: 'Refreshed' };
+  }
+
+  @Post('forgot-password')
+  @HttpCode(200)
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.passwordReset.requestReset(dto.email, 'TENANT_USER');
+  }
+
+  @Post('reset-password')
+  @HttpCode(200)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.passwordReset.resetPassword(dto.token, dto.newPassword, 'TENANT_USER');
+  }
+
+  @UseGuards(TenantUserAuthGuard)
+  @Post('totp/setup')
+  @HttpCode(200)
+  async setupTotp(@CurrentUser() user: any) {
+    return this.service.setupTotp(user.sub);
+  }
+
+  @UseGuards(TenantUserAuthGuard)
+  @Post('totp/enable')
+  @HttpCode(200)
+  async enableTotp(@CurrentUser() user: any, @Body() body: { code: string }) {
+    return this.service.enableTotp(user.sub, body.code);
+  }
+
+  @UseGuards(TenantUserAuthGuard)
+  @Post('totp/disable')
+  @HttpCode(200)
+  async disableTotp(@CurrentUser() user: any) {
+    return this.service.disableTotp(user.sub);
   }
 
   @UseGuards(TenantUserAuthGuard)

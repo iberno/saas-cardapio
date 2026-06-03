@@ -1,3 +1,5 @@
 export { loginPlatform, loginTenantUser, logoutPlatform, logoutTenantUser } from './auth.service'
 export { listarProdutos, criarProduto, atualizarProduto, excluirProduto } from './produtos.service'
 export { listarTenants, criarTenant, atualizarStatusTenant } from './tenants.service'
+export { listarOrders, getOrder, createOrder, updateOrderStatus, cancelOrder } from './orders.service'
+export type { Order, OrderStatus, OrderItem, OrderItemAddon } from './orders.service'

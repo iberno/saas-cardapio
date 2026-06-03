@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { TokenService } from '../shared/token.service';
+import { TotpService } from '../shared/totp.service';
 import { verifyPassword, generateRefreshToken, hashToken, isLocked } from '../shared/auth-utils';
 import { AuditService } from '../../infra/audit/audit.service';
 import { TenantContext } from '../../tenant/tenant-context';
@@ -16,20 +17,21 @@ export class TenantUserAuthService {
   constructor(
     private prisma: PrismaService,
     private tokenService: TokenService,
+    private totp: TotpService,
     private audit: AuditService,
   ) {}
 
   async login(email: string, password: string, ip: string, userAgent?: string, slug?: string) {
     let tenantId: string;
     if (slug) {
-      const tenant = await this.prisma.platform().tenant.findUnique({ where: { slug }, select: { id: true } });
+      const tenant = await this.prisma.tenant.findUnique({ where: { slug }, select: { id: true } });
       if (!tenant) throw new UnauthorizedException('Invalid credentials');
       tenantId = tenant.id;
     } else {
       tenantId = TenantContext.require().tenantId;
     }
 
-    const user = await this.prisma.platform().tenantUser.findFirst({
+    const user = await this.prisma.tenantUser.findFirst({
       where: { tenantId, email },
     });
 
@@ -49,7 +51,7 @@ export class TenantUserAuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    await this.prisma.platform().tenantUser.update({
+    await this.prisma.tenantUser.update({
       where: { id: user.id },
       data: { failedLoginCount: 0, lockedUntil: null, lastLoginAt: new Date() },
     });
@@ -62,7 +64,50 @@ export class TenantUserAuthService {
       ip,
     });
 
+    if (user.totpEnabled) {
+      const preAuthToken = this.totp.createPreAuthToken(user.id, tenantId);
+      return { type: 'totp_required' as const, preAuthToken };
+    }
+
     return this.createSession(user, tenantId, ip, userAgent);
+  }
+
+  async verifyTotpLogin(preAuthToken: string, code: string, ip: string, userAgent?: string) {
+    const { userId, tenantId } = this.totp.consumePreAuthToken(preAuthToken);
+    const user = await this.prisma.tenantUser.findUnique({ where: { id: userId } });
+    if (!user || !user.totpSecret) throw new BadRequestException('TOTP não configurado');
+    if (!this.totp.verify(code, user.totpSecret)) throw new BadRequestException('Código inválido');
+    return this.createSession(user, tenantId!, ip, userAgent);
+  }
+
+  async setupTotp(userId: string) {
+    const user = await this.prisma.tenantUser.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('Usuário não encontrado');
+    const { secret, url } = this.totp.generateSecret(user.email, user.tenant?.name || 'SaaS Cardápio');
+    await this.prisma.tenantUser.update({
+      where: { id: userId },
+      data: { totpSecret: secret, totpEnabled: false },
+    });
+    return { secret, url };
+  }
+
+  async enableTotp(userId: string, code: string) {
+    const user = await this.prisma.tenantUser.findUnique({ where: { id: userId } });
+    if (!user || !user.totpSecret) throw new BadRequestException('TOTP não configurado');
+    if (!this.totp.verify(code, user.totpSecret)) throw new BadRequestException('Código inválido');
+    await this.prisma.tenantUser.update({
+      where: { id: userId },
+      data: { totpEnabled: true },
+    });
+    return { message: '2FA ativado com sucesso' };
+  }
+
+  async disableTotp(userId: string) {
+    await this.prisma.tenantUser.update({
+      where: { id: userId },
+      data: { totpEnabled: false, totpSecret: null },
+    });
+    return { message: '2FA desativado' };
   }
 
   async refresh(refreshToken: string, ip: string, userAgent?: string) {
@@ -120,24 +165,24 @@ export class TenantUserAuthService {
   }
 
   private async createSessionFromToken(stored: any, ip: string, userAgent?: string) {
-    const user = await this.prisma.platform().tenantUser.findUnique({ where: { id: stored.userId } });
+    const user = await this.prisma.tenantUser.findUnique({ where: { id: stored.userId } });
     if (!user) throw new UnauthorizedException('User not found');
     return this.createSession(user, stored.tenantId!, ip, userAgent);
   }
 
   private async incrementFailedAttempts(userId: string) {
-    const user = await this.prisma.platform().tenantUser.findUnique({ where: { id: userId } });
+    const user = await this.prisma.tenantUser.findUnique({ where: { id: userId } });
     if (!user) return;
     const count = user.failedLoginCount + 1;
     const data: any = { failedLoginCount: count };
     if (count >= 5) {
       data.lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
     }
-    await this.prisma.platform().tenantUser.update({ where: { id: userId }, data });
+    await this.prisma.tenantUser.update({ where: { id: userId }, data });
   }
 
   private async recordAttempt(userType: string, identifier: string, tenantId: string | null, ip: string, userAgent: string | undefined, success: boolean) {
-    await this.prisma.platform().loginAttempt.create({
+    await this.prisma.loginAttempt.create({
       data: { userType: userType as any, identifier, tenantId, ip, userAgent, success },
     });
   }

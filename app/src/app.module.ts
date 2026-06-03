@@ -13,6 +13,9 @@ import { CustomerAuthModule } from './auth/customer/customer-auth.module';
 import { PlatformAdminModule } from './platform-admin/platform-admin.module';
 import { CardapioModule } from './cardapio/cardapio.module';
 import { ThemeModule } from './tenant/theme/theme.module';
+import { SettingsModule } from './tenant/settings/settings.module';
+import { StaffModule } from './tenant/staff/staff.module';
+import { OrdersModule } from './tenant/orders/orders.module';
 
 @Module({
   imports: [
@@ -35,6 +38,9 @@ import { ThemeModule } from './tenant/theme/theme.module';
     PlatformAdminModule,
     CardapioModule,
     ThemeModule,
+    SettingsModule,
+    StaffModule,
+    OrdersModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

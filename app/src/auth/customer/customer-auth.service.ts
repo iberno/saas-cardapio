@@ -37,10 +37,51 @@ export class CustomerAuthService {
     return { accessToken, refreshToken, customer };
   }
 
-  async me(customerId: string, tenantId: string) {
-    return this.prisma.customer.findUnique({
-      where: { id: customerId, tenantId },
-      select: { id: true, phone: true, name: true, points: true, createdAt: true },
+  async refresh(refreshToken: string, ip: string, userAgent?: string) {
+    const tokenHash = hashToken(refreshToken);
+    const stored = await this.prisma.refreshToken.findUnique({ where: { tokenHash } });
+    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+    if (stored.userType !== 'CUSTOMER') {
+      throw new UnauthorizedException('Invalid token type');
+    }
+
+    await this.prisma.refreshToken.update({
+      where: { id: stored.id },
+      data: { revokedAt: new Date() },
     });
+
+    const accessToken = this.tokenService.createAccessToken({
+      sub: stored.userId, aud: 'customer', tenantId: stored.tenantId ?? undefined,
+    });
+    const newRefreshToken = generateRefreshToken();
+    const newTokenHash = hashToken(newRefreshToken);
+
+    await this.prisma.refreshToken.create({
+      data: {
+        userType: 'CUSTOMER',
+        userId: stored.userId,
+        tenantId: stored.tenantId,
+        tokenHash: newTokenHash,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdIp: ip,
+        userAgent,
+      },
+    });
+
+    return { accessToken, refreshToken: newRefreshToken };
+  }
+
+  async me(customerId: string, tenantId: string) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: customerId, tenantId },
+      select: { id: true, phone: true, name: true, points: true, createdAt: true, address: true },
+    });
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { id: true, name: true, slug: true, theme: true, contactPhone: true },
+    });
+    return { ...customer, tenant };
   }
 }

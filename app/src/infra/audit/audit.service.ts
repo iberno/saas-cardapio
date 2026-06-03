@@ -15,7 +15,7 @@ export class AuditService {
     metadata?: any;
     ip?: string;
   }) {
-    await this.prisma.platform().auditLog.create({ data: params as any }).catch(() => {
+    await this.prisma.auditLog.create({ data: params as any }).catch(() => {
       // audit failure should never break the app
     });
   }

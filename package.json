@@ -1,0 +1,22 @@
+{
+  "name": "saas-cardapio",
+  "private": true,
+  "scripts": {
+    "dev": "npx concurrently -n api,web -c cyan,magenta \"cd app && npx nest start --watch\" \"cd web && npx vite\"",
+    "dev:api": "cd app && npx nest start --watch",
+    "dev:web": "cd web && npx vite",
+    "build": "cd app && npm run build && cd ../web && npm run build",
+    "build:api": "cd app && npm run build",
+    "build:web": "cd web && npm run build",
+    "db:migrate": "cd app && npx prisma migrate dev",
+    "db:push": "cd app && npx prisma db push",
+    "db:seed": "cd app && npx tsx prisma/seed.ts",
+    "db:reset": "cd app && npx prisma migrate reset --force",
+    "test": "cd app && npx vitest run",
+    "test:e2e": "cd app && npx vitest run test/e2e --no-file-parallelism",
+    "setup": "cd app && npm install && npx prisma db push && npx tsx prisma/seed.ts && cd ../web && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

@@ -4,6 +4,7 @@ import { CardapioController } from './cardapio.controller';
 import { PublicCardapioController } from './public-cardapio.controller';
 import { CardapioService } from './cardapio.service';
 import { TokenService } from '../auth/shared/token.service';
+import { TenantOrPlatformGuard } from '../common/guards/tenant-or-platform.guard';
 import { UploadModule } from './upload/upload.module';
 import { TenantModule } from '../tenant/tenant.module';
 import { CategoriasModule } from './categorias/categorias.module';
@@ -17,6 +18,6 @@ import { BannersModule } from './banners/banners.module';
     UploadModule, TenantModule, CategoriasModule, VariantesModule, GruposModule, BannersModule,
   ],
   controllers: [CardapioController, PublicCardapioController],
-  providers: [CardapioService, TokenService],
+  providers: [CardapioService, TokenService, TenantOrPlatformGuard],
 })
 export class CardapioModule {}

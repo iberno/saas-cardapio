@@ -16,12 +16,22 @@ export interface TenantUser {
   createdAt: string
 }
 
+export interface CustomerTenantInfo {
+  id: string
+  name: string
+  slug: string
+  theme: unknown
+  contactPhone: string | null
+}
+
 export interface Customer {
   id: string
   phone: string
   name: string | null
   points: number
   createdAt: string
+  address?: string | null
+  tenant?: CustomerTenantInfo
 }
 
 export interface LoginRequest {
