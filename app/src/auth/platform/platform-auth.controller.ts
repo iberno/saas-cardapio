@@ -51,6 +51,7 @@ export class PlatformAuthController {
   @HttpCode(200)
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies?.pa_session_refresh;
+    if (!token) throw new UnauthorizedException('Missing refresh token');
     const ip = req.ip || '';
     const ua = req.headers['user-agent'];
     const { accessToken, refreshToken } = await this.service.refresh(token, ip, ua);

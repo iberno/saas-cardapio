@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Req, Res, UseGuards, HttpCode } from '@nestjs/common';
+import { Controller, Post, Get, Body, Req, Res, UseGuards, HttpCode, UnauthorizedException } from '@nestjs/common';
 import { TenantUserAuthService } from './tenant-user-auth.service';
 import { PasswordResetService } from '../shared/password-reset.service';
 import { TenantUserLoginDto } from './dto/tenant-user-login.dto';
@@ -51,6 +51,7 @@ export class TenantUserAuthController {
   @HttpCode(200)
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies?.tu_session_refresh;
+    if (!token) throw new UnauthorizedException('Missing refresh token');
     const ip = req.ip || '';
     const ua = req.headers['user-agent'];
     const { accessToken, refreshToken } = await this.service.refresh(token, ip, ua);
