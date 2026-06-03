@@ -925,7 +925,7 @@ function PublicCardapioPage() {
       )}
 
       {/* ===== STORE INFO MODAL ===== */}
-      {showStoreInfo && storeSettings && (
+      {showStoreInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowStoreInfo(false)} />
           <div className="relative modal-box max-w-sm" style={{ backgroundColor: t.base100 }}>
@@ -934,9 +934,9 @@ function PublicCardapioPage() {
             </button>
             <div className="space-y-4">
               <h3 className="font-bold text-lg">{loja.name}</h3>
-              {storeSettings.description && <p className="text-sm opacity-60">{storeSettings.description}</p>}
+              {storeSettings?.description && <p className="text-sm opacity-60">{storeSettings.description}</p>}
               <div className="space-y-3">
-                {storeSettings.address && (
+                {storeSettings?.address && (
                   <div className="flex items-start gap-3">
                     <MapPin size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
                     <span className="text-sm">{storeSettings.address}</span>
@@ -948,7 +948,7 @@ function PublicCardapioPage() {
                     <span className="text-sm">{loja.contactPhone}</span>
                   </div>
                 )}
-                {storeSettings.instagram && (
+                {storeSettings?.instagram && (
                   <div className="flex items-start gap-3">
                     <ExternalLink size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
                     <a
@@ -962,14 +962,14 @@ function PublicCardapioPage() {
                     </a>
                   </div>
                 )}
-                {storeSettings.hoursText && (
+                {storeSettings?.hoursText && (
                   <div className="flex items-start gap-3">
                     <Clock size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
                     <span className="text-sm whitespace-pre-line">{storeSettings.hoursText}</span>
                   </div>
                 )}
               </div>
-              {storeSettings.paymentMethods && (
+              {storeSettings?.paymentMethods && (
                 <div className="flex items-start gap-3 pt-2 border-t" style={{ borderColor: t.base200 }}>
                   <CreditCard size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
                   <span className="text-sm whitespace-pre-line">{storeSettings.paymentMethods}</span>

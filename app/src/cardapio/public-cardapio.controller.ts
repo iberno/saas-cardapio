@@ -27,10 +27,22 @@ export class PublicCardapioController {
 
   @Get(':slug/loja')
   async getLoja(@Param('slug') slug: string) {
-    return this.prisma.tenant.findUnique({
+    const tenant = await this.prisma.tenant.findUnique({
       where: { slug },
       select: { id: true, name: true, slug: true, theme: true, contactPhone: true, settings: true },
     });
+    if (!tenant) return null;
+    const s = (tenant.settings || {}) as Record<string, unknown>;
+    return {
+      ...tenant,
+      settings: {
+        description: s.description || '',
+        address: s.address || '',
+        instagram: s.instagram || '',
+        hoursText: s.hoursText || '',
+        paymentMethods: s.paymentMethods || '',
+      },
+    };
   }
 
   @Get(':slug/banners')
