@@ -29,7 +29,7 @@ export class PublicCardapioController {
   async getLoja(@Param('slug') slug: string) {
     return this.prisma.tenant.findUnique({
       where: { slug },
-      select: { id: true, name: true, slug: true, theme: true, contactPhone: true },
+      select: { id: true, name: true, slug: true, theme: true, contactPhone: true, settings: true },
     });
   }
 

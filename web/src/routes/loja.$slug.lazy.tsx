@@ -69,6 +69,7 @@ interface LojaInfo {
   slug: string
   theme: StoreTheme | null
   contactPhone: string | null
+  settings: StoreSettingsData | null
 }
 
 interface StoreSettingsData {
@@ -134,16 +135,12 @@ function PublicCardapioPage() {
       api.get<{ data: PublicProduto[] }>(`/public/${slug}/produtos`),
       api.get<LojaInfo | null>(`/public/${slug}/loja`),
       api.get<PublicBanner[]>(`/public/${slug}/banners`),
-      api.get<any>(`/public/${slug}/loja`).then((l) => {
-        if (l?.id) return api.get<StoreSettingsData>(`/tenants/${l.id}/settings`).catch(() => null)
-        return null
-      }),
     ])
-      .then(([p, l, b, s]) => {
+      .then(([p, l, b]) => {
         setProdutos(p.data)
         setLoja(l)
         setBanners(b)
-        setStoreSettings(s)
+        setStoreSettings(l?.settings ?? null)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
