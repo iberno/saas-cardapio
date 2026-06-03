@@ -1,6 +1,7 @@
-import { Controller, Post, Get, Body, Req, Res, UseGuards, HttpCode, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Req, Res, UseGuards, HttpCode, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { CustomerAuthService } from './customer-auth.service';
 import { CustomerLoginDto } from './dto/customer-login.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerAuthGuard } from '../../common/guards/customer-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Response, Request } from 'express';
@@ -58,6 +59,12 @@ export class CustomerAuthController {
   @Get('me')
   me(@CurrentUser() user: any) {
     return this.service.me(user.sub, user.tenantId);
+  }
+
+  @UseGuards(CustomerAuthGuard)
+  @Patch('profile')
+  updateProfile(@CurrentUser() user: any, @Body() dto: UpdateCustomerDto) {
+    return this.service.update(user.sub, user.tenantId, dto);
   }
 }
 

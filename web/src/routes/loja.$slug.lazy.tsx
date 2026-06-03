@@ -398,9 +398,14 @@ function PublicCardapioPage() {
               <Info size={16} />
             </button>
             {customer && (
-              <Link to="/meus-pedidos" className="btn btn-ghost btn-xs" title="Meus Pedidos">
-                <ClipboardList size={16} />
-              </Link>
+              <>
+                <Link to="/meus-pedidos" className="btn btn-ghost btn-xs" title="Meus Pedidos">
+                  <ClipboardList size={16} />
+                </Link>
+                <Link to="/minha-conta" className="btn btn-ghost btn-xs" title="Minha Conta">
+                  <User size={16} />
+                </Link>
+              </>
             )}
             {customer && customer.points > 0 && (
               <span className="flex items-center gap-1 text-xs font-medium" style={{ color: t.accent }}>

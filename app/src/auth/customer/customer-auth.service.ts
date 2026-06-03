@@ -84,4 +84,12 @@ export class CustomerAuthService {
     });
     return { ...customer, tenant };
   }
+
+  async update(customerId: string, tenantId: string, data: { name?: string; address?: string }) {
+    return this.prisma.customer.update({
+      where: { id: customerId, tenantId },
+      data,
+      select: { id: true, phone: true, name: true, points: true, createdAt: true, address: true },
+    });
+  }
 }

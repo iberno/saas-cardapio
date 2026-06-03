@@ -4,7 +4,7 @@ import { api } from '../lib/api-client'
 import { listPublicOrders } from '../services/public-orders.service'
 import { STATUS_LABELS, type Order } from '../services/orders.service'
 import type { Customer, StoreTheme } from '../types'
-import { ArrowLeft, ChefHat, Star } from 'lucide-react'
+import { ArrowLeft, ChefHat, Star, User } from 'lucide-react'
 
 export const Route = createLazyFileRoute('/meus-pedidos')({
   component: MeusPedidosPage,
@@ -66,6 +66,9 @@ function MeusPedidosPage() {
             <ArrowLeft size={16} /> {customer.tenant.name}
           </Link>
           <div className="flex items-center gap-2">
+            <Link to="/minha-conta" className="btn btn-ghost btn-xs gap-1" title="Minha Conta">
+              <User size={14} />
+            </Link>
             <span className="text-sm opacity-80">{customer.name || customer.phone}</span>
             {customer.points > 0 && (
               <span className="flex items-center gap-1 text-sm" style={{ color: t.accent }}>
