@@ -15,7 +15,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           port: ${{ secrets.VPS_PORT }}
-          username: root
+          username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /root/sitesOn/ohmeupedido
