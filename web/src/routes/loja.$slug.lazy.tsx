@@ -510,6 +510,20 @@ function PublicCardapioPage() {
         </div>
       )}
 
+      {/* ===== SOBRE ===== */}
+      {storeSettings?.description && (
+        <div className="max-w-lg lg:max-w-6xl mx-auto px-4 pt-4">
+          <div className="rounded-xl p-4" style={{ backgroundColor: t.base200 }}>
+            <h2 className="font-bold text-sm mb-2 flex items-center gap-1.5" style={{ color: t.baseContent }}>
+              <Info size={16} /> Sobre
+            </h2>
+            <p className="text-sm leading-relaxed opacity-70 whitespace-pre-line" style={{ color: t.baseContent }}>
+              {storeSettings.description}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ===== PRODUCTS ===== */}
       <main className="max-w-lg lg:max-w-6xl mx-auto px-4 py-4 pb-28">
         {filteredProducts.length === 0 ? (
