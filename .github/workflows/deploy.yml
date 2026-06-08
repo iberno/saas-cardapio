@@ -1,0 +1,24 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /root/sitesOn/ohmeupedido
+            git stash
+            git pull origin main
+            docker compose up -d --build

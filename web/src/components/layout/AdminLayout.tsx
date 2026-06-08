@@ -51,6 +51,9 @@ export function AdminLayout() {
             <Menu size={24} />
           </button>
           <div className="flex items-center gap-3 ml-auto">
+            {(user as TenantUser)?.logoUrl && (
+              <img src={(user as TenantUser).logoUrl} alt="Logo" className="w-8 h-8 rounded-full object-cover" />
+            )}
             {tenantSlug && (
               <a
                 href={`/loja/${tenantSlug}`}

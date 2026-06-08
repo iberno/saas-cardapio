@@ -14,6 +14,7 @@ export interface TenantUser {
   totpEnabled: boolean
   tenantId: string
   slug: string
+  logoUrl: string
   createdAt: string
 }
 

@@ -10,6 +10,7 @@ export interface StoreSettings {
   paymentMethods: string
   pointsEnabled: boolean
   pointsPerReais: number
+  logoUrl: string
 }
 
 export async function getSettings(tenantId: string): Promise<StoreSettings> {

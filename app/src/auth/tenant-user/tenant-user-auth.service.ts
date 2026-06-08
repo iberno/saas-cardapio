@@ -135,11 +135,12 @@ export class TenantUserAuthService {
   async me(userId: string, tenantId: string) {
     const user = await this.prisma.tenantUser.findUnique({
       where: { id: userId, tenantId },
-      select: { id: true, email: true, name: true, role: true, totpEnabled: true, tenantId: true, tenant: { select: { slug: true } }, createdAt: true },
+      select: { id: true, email: true, name: true, role: true, totpEnabled: true, tenantId: true, tenant: { select: { slug: true, settings: true } }, createdAt: true },
     });
     if (!user) return null
     const { tenant, ...rest } = user
-    return { ...rest, slug: tenant.slug }
+    const s = (tenant.settings || {}) as Record<string, unknown>
+    return { ...rest, slug: tenant.slug, logoUrl: (s.logoUrl as string) || '' }
   }
 
   private async createSession(user: any, tenantId: string, ip: string, userAgent?: string) {

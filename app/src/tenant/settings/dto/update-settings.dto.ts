@@ -9,4 +9,5 @@ export class UpdateSettingsDto {
   @IsOptional() @IsBoolean() pointsEnabled?: boolean;
   @IsOptional() @IsNumber() @Min(0.5) pointsPerReais?: number;
   @IsOptional() @IsString() contactPhone?: string;
+  @IsOptional() @IsString() logoUrl?: string;
 }

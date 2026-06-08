@@ -16,6 +16,7 @@ import { ThemeModule } from './tenant/theme/theme.module';
 import { SettingsModule } from './tenant/settings/settings.module';
 import { StaffModule } from './tenant/staff/staff.module';
 import { OrdersModule } from './tenant/orders/orders.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { OrdersModule } from './tenant/orders/orders.module';
     SettingsModule,
     StaffModule,
     OrdersModule,
+    ReviewsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

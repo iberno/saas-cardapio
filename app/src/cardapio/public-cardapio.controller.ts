@@ -41,6 +41,7 @@ export class PublicCardapioController {
         instagram: s.instagram || '',
         hoursText: s.hoursText || '',
         paymentMethods: s.paymentMethods || '',
+        logoUrl: s.logoUrl || '',
       },
     };
   }

@@ -43,6 +43,10 @@ function parseTime(timeStr: string): { start: number; end: number } | null {
   return { start: extractMinutes(parts[0]), end: extractMinutes(parts[parts.length - 1]) }
 }
 
+function parseRanges(timePart: string): { start: number; end: number }[] {
+  return timePart.split(/[e,]/i).map((s) => s.trim()).filter(Boolean).map(parseTime).filter(Boolean) as { start: number; end: number }[]
+}
+
 export interface StoreOpenInfo {
   isOpen: boolean
   label: string
@@ -59,7 +63,7 @@ export function getStoreOpenInfo(hoursText: string | null): StoreOpenInfo {
   const lines = hoursText.split("\n").map((l) => l.trim()).filter(Boolean)
 
   for (const line of lines) {
-    const match = line.match(/^([^0-9]+?)\s*:?\s*(.+)$/)
+    const match = line.match(/^([A-Za-zÀ-ÿ-]+)\s*:\s*(.+)$/)
     if (!match) continue
 
     const dayPart = match[1].trim()
@@ -72,27 +76,34 @@ export function getStoreOpenInfo(hoursText: string | null): StoreOpenInfo {
 
     if (!days.includes(currentDay)) continue
 
-    const times = parseTime(timePart)
-    if (!times) continue
+    const ranges = parseRanges(timePart)
+    if (ranges.length === 0) continue
 
     const fmt = (m: number) => `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`.replace("h00", "h")
 
-    if (currentMinutes >= times.start && currentMinutes < times.end) {
-      return { isOpen: true, label: `Aberto • ${fmt(times.start)} às ${fmt(times.end)}`, nextOpen: null }
+    for (const r of ranges) {
+      if (currentMinutes >= r.start && currentMinutes < r.end) {
+        return { isOpen: true, label: `Aberto • ${fmt(r.start)} às ${fmt(r.end)}`, nextOpen: null }
+      }
     }
 
-    return { isOpen: false, label: "Fechado agora", nextOpen: `Abre às ${fmt(times.start)}` }
+    const nextRange = [...ranges].sort((a, b) => a.start - b.start).find((r) => currentMinutes < r.start)
+    if (nextRange) {
+      return { isOpen: false, label: "Fechado agora", nextOpen: `Abre às ${fmt(nextRange.start)}` }
+    }
+
+    return { isOpen: false, label: "Fechado agora", nextOpen: null }
   }
 
   for (const line of lines) {
-    const match = line.match(/^([^0-9]+?)\s*:?\s*(.+)$/)
+    const match = line.match(/^([A-Za-zÀ-ÿ-]+)\s*:\s*(.+)$/)
     if (!match) continue
     const timePart = match[2].trim()
     if (/fechado|fecha/i.test(timePart)) continue
-    const times = parseTime(timePart)
-    if (!times) continue
+    const ranges = parseRanges(timePart)
+    if (ranges.length === 0) continue
     const fmt = (m: number) => `${Math.floor(m / 60)}h${String(m % 60).padStart(2, "0")}`.replace("h00", "h")
-    return { isOpen: false, label: "Fechado hoje", nextOpen: `Próximo horário: ${fmt(times.start)}` }
+    return { isOpen: false, label: "Fechado hoje", nextOpen: `Próximo horário: ${fmt(ranges[0].start)}` }
   }
 
   return { isOpen: false, label: "Fechado hoje", nextOpen: null }

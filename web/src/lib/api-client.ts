@@ -4,7 +4,6 @@ let csrfToken: string | null = null
 let refreshing: Promise<boolean> | null = null
 
 export async function obtainCsrf(): Promise<string> {
-  if (csrfToken) return csrfToken
   const res = await fetch(`${BASE_URL}/auth/csrf`, { credentials: 'include' })
   if (!res.ok) {
     const text = await res.text().catch(() => '')

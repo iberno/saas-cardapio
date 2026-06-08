@@ -23,6 +23,7 @@ export class SettingsService {
       paymentMethods: s.paymentMethods || '',
       pointsEnabled: s.pointsEnabled || false,
       pointsPerReais: s.pointsPerReais || 1,
+      logoUrl: s.logoUrl || '',
     };
   }
 

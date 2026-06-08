@@ -1,10 +1,11 @@
-import { createLazyFileRoute, Link } from '@tanstack/react-router'
+import { createLazyFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { api } from '../lib/api-client'
 import { useCustomerAuth } from '../lib/use-customer-auth'
 import { getStoreOpenInfo } from '../lib/store-hours'
 import type { StoreTheme } from '../types'
 import { createPublicOrder } from '../services/public-orders.service'
+import { ProductReviewStats } from '../components/ProductRating'
 import { OrderStatusPoller } from '../components/OrderStatusPoller'
 import {
   Phone, ShoppingCart, Trash2, X, User, LogOut, Star, ClipboardList,
@@ -78,6 +79,7 @@ interface StoreSettingsData {
   hoursText: string
   paymentMethods: string
   description: string
+  logoUrl: string
 }
 
 export const Route = createLazyFileRoute('/loja/$slug')({
@@ -86,6 +88,7 @@ export const Route = createLazyFileRoute('/loja/$slug')({
 
 function PublicCardapioPage() {
   const { slug } = Route.useParams()
+  const navigate = useNavigate()
   const [produtos, setProdutos] = useState<PublicProduto[]>([])
   const [banners, setBanners] = useState<PublicBanner[]>([])
   const [loja, setLoja] = useState<LojaInfo | null>(null)
@@ -365,6 +368,9 @@ function PublicCardapioPage() {
       >
         <div className="max-w-lg lg:max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
+            {storeSettings?.logoUrl && (
+              <img src={storeSettings.logoUrl} alt={loja.name} className="w-10 h-10 rounded-full object-cover shrink-0" />
+            )}
             <div className="min-w-0">
               <h1 className="font-bold text-base truncate">{loja.name}</h1>
               {storeOpenInfo && (
@@ -538,6 +544,7 @@ function PublicCardapioPage() {
                       key={p.id}
                       product={p}
                       t={t}
+                      slug={slug}
                       onOpen={openProductModal}
                     />
                   ))}
@@ -839,6 +846,7 @@ function PublicCardapioPage() {
                       setCartObservacao('')
                       setShowCart(false)
                       window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
+                      if (customer) navigate({ to: '/meus-pedidos' })
                     }}
                     className="btn w-full flex items-center gap-2 text-white font-semibold"
                     style={{ backgroundColor: '#25D366' }}
@@ -928,53 +936,73 @@ function PublicCardapioPage() {
       {showStoreInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowStoreInfo(false)} />
-          <div className="relative modal-box max-w-sm" style={{ backgroundColor: t.base100 }}>
+          <div className="relative w-full max-w-sm p-6 rounded-box shadow-xl" style={{ backgroundColor: t.base100 }}>
             <button onClick={() => setShowStoreInfo(false)} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
               <X size={20} />
             </button>
             <div className="space-y-4">
               <h3 className="font-bold text-lg">{loja.name}</h3>
-              {storeSettings?.description && <p className="text-sm opacity-60">{storeSettings.description}</p>}
-              <div className="space-y-3">
-                {storeSettings?.address && (
-                  <div className="flex items-start gap-3">
-                    <MapPin size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
-                    <span className="text-sm">{storeSettings.address}</span>
-                  </div>
-                )}
-                {loja.contactPhone && (
-                  <div className="flex items-start gap-3">
-                    <Phone size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
-                    <span className="text-sm">{loja.contactPhone}</span>
-                  </div>
-                )}
-                {storeSettings?.instagram && (
-                  <div className="flex items-start gap-3">
-                    <ExternalLink size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
-                    <a
-                      href={`https://instagram.com/${storeSettings.instagram.replace('@', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm hover:underline"
-                      style={{ color: t.primary }}
-                    >
-                      {storeSettings.instagram}
-                    </a>
-                  </div>
-                )}
-                {storeSettings?.hoursText && (
-                  <div className="flex items-start gap-3">
-                    <Clock size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
-                    <span className="text-sm whitespace-pre-line">{storeSettings.hoursText}</span>
-                  </div>
-                )}
-              </div>
-              {storeSettings?.paymentMethods && (
-                <div className="flex items-start gap-3 pt-2 border-t" style={{ borderColor: t.base200 }}>
-                  <CreditCard size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
-                  <span className="text-sm whitespace-pre-line">{storeSettings.paymentMethods}</span>
-                </div>
-              )}
+              {(() => {
+                const hasInfo =
+                  storeSettings?.description ||
+                  storeSettings?.address ||
+                  loja.contactPhone ||
+                  storeSettings?.instagram ||
+                  storeSettings?.hoursText ||
+                  storeSettings?.paymentMethods;
+                if (!hasInfo) {
+                  return (
+                    <p className="text-sm opacity-40 italic">
+                      Nenhuma informação cadastrada ainda.
+                    </p>
+                  );
+                }
+                return (
+                  <>
+                    {storeSettings?.description && <p className="text-sm opacity-60">{storeSettings.description}</p>}
+                    <div className="space-y-3">
+                      {storeSettings?.address && (
+                        <div className="flex items-start gap-3">
+                          <MapPin size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
+                          <span className="text-sm">{storeSettings.address}</span>
+                        </div>
+                      )}
+                      {loja.contactPhone && (
+                        <div className="flex items-start gap-3">
+                          <Phone size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
+                          <span className="text-sm">{loja.contactPhone}</span>
+                        </div>
+                      )}
+                      {storeSettings?.instagram && (
+                        <div className="flex items-start gap-3">
+                          <ExternalLink size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
+                          <a
+                            href={`https://instagram.com/${storeSettings.instagram.replace('@', '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm hover:underline"
+                            style={{ color: t.primary }}
+                          >
+                            {storeSettings.instagram}
+                          </a>
+                        </div>
+                      )}
+                      {storeSettings?.hoursText && (
+                        <div className="flex items-start gap-3">
+                          <Clock size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
+                          <span className="text-sm whitespace-pre-line">{storeSettings.hoursText}</span>
+                        </div>
+                      )}
+                    </div>
+                    {storeSettings?.paymentMethods && (
+                      <div className="flex items-start gap-3 pt-2 border-t" style={{ borderColor: t.base200 }}>
+                        <CreditCard size={18} className="mt-0.5 shrink-0" style={{ color: t.primary }} />
+                        <span className="text-sm whitespace-pre-line">{storeSettings.paymentMethods}</span>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -1028,9 +1056,10 @@ function PublicCardapioPage() {
 }
 
 /* ===== Product Card Component ===== */
-function ProductCard({ product: p, t, onOpen }: {
+function ProductCard({ product: p, t, slug, onOpen }: {
   product: PublicProduto
   t: StoreTheme
+  slug: string
   onOpen: (p: PublicProduto) => void
 }) {
   const hasVariants = p.variantes.length > 0
@@ -1065,6 +1094,7 @@ function ProductCard({ product: p, t, onOpen }: {
           {p.descricao && (
             <p className="text-xs mt-0.5 opacity-60 line-clamp-2">{p.descricao}</p>
           )}
+          <ProductReviewStats slug={slug} productId={p.id} />
         </div>
         <div className="flex items-center justify-between mt-2">
           <span className="font-bold text-sm" style={{ color: t.primary }}>{displayPrice}</span>

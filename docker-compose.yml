@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ohmeupedido123
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://saas_app:changeme@postgres:5432/saas_cardapio
+      DATABASE_PLATFORM_URL: postgresql://saas_platform:changeme@postgres:5432/saas_cardapio
+      JWT_SECRET: troque-por-jwt-seguro-aqui
+      COOKIE_DOMAIN_BASE: ohmeupedido.com.br
+      TOTP_ENCRYPTION_KEY: troque-por-chave-totp-aqui
+      LOG_LEVEL: debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: always
+    ports:
+      - "127.0.0.1:4000:80"
+    depends_on:
+      - api
+
+volumes:
+  pg_data:

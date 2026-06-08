@@ -27,6 +27,10 @@ async function main() {
       name: 'El Sabor Açaí',
       status: 'ACTIVE',
       contactEmail: 'contato@elsaboracai.com.br',
+      contactPhone: '(11) 99999-9999',
+      settings: {
+        hoursText: 'Seg-Sex: 08h-12h e 14h-19h\nSáb: 09h-17h',
+      },
     },
   });
   console.log('Tenant:', tenant.slug, tenant.id);

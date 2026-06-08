@@ -1,8 +1,11 @@
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { useAuth } from '../lib/auth-context'
 import { getSettings, updateSettings, type StoreSettings } from '../services/settings.service'
-import { Save, MapPin, Phone, Clock, CreditCard, Star, ExternalLink } from 'lucide-react'
+import { StoreHoursEditor } from '../components/StoreHoursEditor'
+import { ImageUpload } from '../components/ui/ImageUpload'
+import { Save, MapPin, Phone, Clock, CreditCard, Star, ExternalLink, Image } from 'lucide-react'
 
 export const Route = createLazyFileRoute('/admin/loja/configuracoes')({
   component: ConfiguracoesPage,
@@ -24,6 +27,7 @@ function ConfiguracoesPage() {
   const [pointsEnabled, setPointsEnabled] = useState(false)
   const [pointsPerReais, setPointsPerReais] = useState(1)
   const [contactPhone, setContactPhone] = useState('')
+  const [logoUrl, setLogoUrl] = useState('')
 
   useEffect(() => {
     if (!tenantId) return
@@ -37,6 +41,7 @@ function ConfiguracoesPage() {
       setPointsEnabled(s.pointsEnabled)
       setPointsPerReais(s.pointsPerReais)
       setContactPhone(s.contactPhone || '')
+      setLogoUrl(s.logoUrl || '')
     }).finally(() => setLoading(false))
   }, [tenantId])
 
@@ -47,9 +52,12 @@ function ConfiguracoesPage() {
     try {
       const updated = await updateSettings(tenantId, {
         description, address, instagram, hoursText, paymentMethods,
-        pointsEnabled, pointsPerReais, contactPhone,
+        pointsEnabled, pointsPerReais, contactPhone, logoUrl,
       })
       setSettings(updated)
+      toast.success('Configurações salvas com sucesso!')
+    } catch {
+      toast.error('Erro ao salvar configurações. Verifique o console.')
     } finally {
       setSaving(false)
     }
@@ -65,6 +73,18 @@ function ConfiguracoesPage() {
         <div>
           <label className="label font-semibold text-sm">Nome da loja</label>
           <input value={settings?.name || ''} className="input w-full opacity-60" disabled />
+        </div>
+
+        <div>
+          <label className="label font-semibold text-sm flex items-center gap-1">
+            <Image size={16} /> Logo da loja
+          </label>
+          <ImageUpload
+            tenantId={tenantId!}
+            currentUrl={logoUrl}
+            onUpload={(url) => setLogoUrl(url)}
+            onRemove={() => setLogoUrl('')}
+          />
         </div>
         <div>
           <label className="label font-semibold text-sm">Telefone de contato</label>
@@ -89,7 +109,7 @@ function ConfiguracoesPage() {
           <label className="label font-semibold text-sm flex items-center gap-1">
             <Clock size={16} /> Horário de funcionamento
           </label>
-          <textarea value={hoursText} onChange={(e) => setHoursText(e.target.value)} className="textarea w-full" rows={3} placeholder="Seg-Sex: 08h-19h&#10;Sáb: 09h-17h&#10;Dom: Fechado" />
+          <StoreHoursEditor value={hoursText} onChange={setHoursText} />
         </div>
 
         <div>

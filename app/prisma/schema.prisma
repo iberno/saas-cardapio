@@ -41,6 +41,7 @@ model Tenant {
   categorias  CategoriaCardapio[]
   banners     Banner[]
   orders      Order[]
+  reviews     ProductReview[]
 
   @@index([status])
   @@map("tenants")
@@ -101,6 +102,7 @@ model Customer {
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orders Order[]
+  reviews ProductReview[]
 
   @@unique([tenantId, phone])
   @@index([tenantId])
@@ -126,6 +128,7 @@ model Produto {
   categoriaCardapio CategoriaCardapio?  @relation(fields: [categoriaId], references: [id])
   variantes        ProdutoVariante[]
   grupos           Grupo[]
+  reviews          ProductReview[]
 
   @@index([tenantId])
   @@index([tenantId, categoria])
@@ -301,6 +304,7 @@ model Order {
   tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   customer Customer? @relation(fields: [customerId], references: [id])
   items    OrderItem[]
+  reviews  ProductReview[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -334,4 +338,25 @@ model OrderItemAddon {
 
   @@index([orderItemId])
   @@map("order_item_addons")
+}
+
+model ProductReview {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  productId  String   @map("product_id") @db.Uuid
+  customerId String   @map("customer_id") @db.Uuid
+  orderId    String?  @map("order_id") @db.Uuid
+  rating     Int      @default(5)
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  produto  Produto  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id])
+  order    Order?   @relation(fields: [orderId], references: [id])
+
+  @@unique([customerId, productId])
+  @@index([tenantId, productId])
+  @@map("product_reviews")
 }

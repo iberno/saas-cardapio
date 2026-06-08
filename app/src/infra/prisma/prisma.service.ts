@@ -4,7 +4,7 @@ import { TenantContext } from '../../tenant/tenant-context';
 
 const TENANT_SCOPED_MODELS = new Set([
   'TenantUser', 'Customer', 'Produto', 'CategoriaCardapio', 'Banner',
-  'Order', 'OrderItem', 'OrderItemAddon',
+  'Order', 'OrderItem', 'OrderItemAddon', 'ProductReview',
 ]);
 
 function injectTenantId(args: any, tenantId: string, operation: string) {
