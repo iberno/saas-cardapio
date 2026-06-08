@@ -1,6 +1,7 @@
-import { IsOptional, IsString, IsBoolean, IsNumber, Min } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsNumber, Min, Matches } from 'class-validator';
 
 export class UpdateSettingsDto {
+  @IsOptional() @IsString() @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'slug must contain only lowercase letters, numbers, and hyphens' }) slug?: string;
   @IsOptional() @IsString() description?: string;
   @IsOptional() @IsString() address?: string;
   @IsOptional() @IsString() instagram?: string;

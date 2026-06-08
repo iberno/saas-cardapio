@@ -1,6 +1,7 @@
 import { api } from '../lib/api-client'
 
 export interface StoreSettings {
+  slug: string
   name: string
   contactPhone: string | null
   description: string

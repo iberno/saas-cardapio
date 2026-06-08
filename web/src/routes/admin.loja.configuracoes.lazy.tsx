@@ -5,7 +5,7 @@ import { useAuth } from '../lib/auth-context'
 import { getSettings, updateSettings, type StoreSettings } from '../services/settings.service'
 import { StoreHoursEditor } from '../components/StoreHoursEditor'
 import { ImageUpload } from '../components/ui/ImageUpload'
-import { Save, MapPin, Phone, Clock, CreditCard, Star, ExternalLink, Image, FileText } from 'lucide-react'
+import { Save, MapPin, Phone, Clock, CreditCard, Star, ExternalLink, Image, FileText, Link } from 'lucide-react'
 
 export const Route = createLazyFileRoute('/admin/loja/configuracoes')({
   component: ConfiguracoesPage,
@@ -19,6 +19,7 @@ function ConfiguracoesPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
+  const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
   const [address, setAddress] = useState('')
   const [instagram, setInstagram] = useState('')
@@ -33,6 +34,7 @@ function ConfiguracoesPage() {
     if (!tenantId) return
     getSettings(tenantId).then((s) => {
       setSettings(s)
+      setSlug(s.slug)
       setDescription(s.description)
       setAddress(s.address)
       setInstagram(s.instagram)
@@ -51,7 +53,7 @@ function ConfiguracoesPage() {
     setSaving(true)
     try {
       const updated = await updateSettings(tenantId, {
-        description, address, instagram, hoursText, paymentMethods,
+        slug, description, address, instagram, hoursText, paymentMethods,
         pointsEnabled, pointsPerReais, contactPhone, logoUrl,
       })
       setSettings(updated)
@@ -73,6 +75,14 @@ function ConfiguracoesPage() {
         <div>
           <label className="label font-semibold text-sm">Nome da loja</label>
           <input value={settings?.name || ''} className="input w-full opacity-60" disabled />
+        </div>
+
+        <div>
+          <label className="label font-semibold text-sm flex items-center gap-1">
+            <Link size={16} /> Slug da loja
+          </label>
+          <input value={slug} onChange={(e) => setSlug(e.target.value)} className="input w-full font-mono text-sm" placeholder="minha-loja" />
+          <p className="text-xs opacity-40 mt-1">Define a URL da loja: seu-site.com.br/<span className="font-mono">{slug || 'slug'}</span></p>
         </div>
 
         <div>
