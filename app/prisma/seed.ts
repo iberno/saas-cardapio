@@ -4,10 +4,10 @@ import * as argon2 from 'argon2';
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@saas-cardapio.local';
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'Admin123@senha';
-  const ownerEmail = process.env.SEED_TENANT_OWNER_EMAIL || 'owner@acai.local';
-  const ownerPassword = process.env.SEED_TENANT_OWNER_PASSWORD || 'Admin123@senha';
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@ohmeupedido.com.br';
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'H0ffm@nn3';
+  const ownerEmail = process.env.SEED_TENANT_OWNER_EMAIL || 'owner@elsaboracai.com.br';
+  const ownerPassword = process.env.SEED_TENANT_OWNER_PASSWORD || 'elsaboracai123@senha';
 
   const adminHash = await argon2.hash(adminPassword);
   const ownerHash = await argon2.hash(ownerPassword);
