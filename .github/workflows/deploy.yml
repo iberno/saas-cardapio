@@ -13,7 +13,7 @@ jobs:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.HOST }}
+          host: 143.95.209.215
           port: ${{ secrets.PORT }}
           username: root
           key: ${{ secrets.SSH_KEY }}
