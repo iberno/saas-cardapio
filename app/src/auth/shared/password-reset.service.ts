@@ -1,27 +1,32 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../infra/prisma/prisma.service';
+import { MailService } from '../../infra/mail/mail.service';
 import { hashPassword } from './auth-utils';
 import * as crypto from 'crypto';
 
-const TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
+const TOKEN_EXPIRY_MS = 60 * 60 * 1000;
 
 @Injectable()
 export class PasswordResetService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mail: MailService,
+  ) {}
 
   async requestReset(email: string, userType: 'PLATFORM_ADMIN' | 'TENANT_USER') {
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     let userId: string | null = null;
+    let userName = '';
 
     if (userType === 'PLATFORM_ADMIN') {
       const admin = await this.prisma.platformAdmin.findUnique({ where: { email } });
-      if (admin) userId = admin.id;
+      if (admin) { userId = admin.id; userName = admin.name; }
     } else {
       const user = await this.prisma.tenantUser.findFirst({ where: { email } });
-      if (user) userId = user.id;
+      if (user) { userId = user.id; userName = user.name; }
     }
 
     if (!userId) {
-      // Não revelar se o email existe ou não
       return { message: 'Se o email existir, um link de redefinição será gerado.' };
     }
 
@@ -37,13 +42,20 @@ export class PasswordResetService {
       },
     });
 
+    const typeParam = userType === 'PLATFORM_ADMIN' ? 'platform' : 'tenant';
+    const resetUrl = `${baseUrl}/resetar-senha?token=${rawToken}&type=${typeParam}`;
+
     if (process.env.NODE_ENV === 'development') {
       return {
         message: 'Se o email existir, um link de redefinição será gerado.',
         devToken: rawToken,
-        devUrl: `http://localhost:5173/resetar-senha?token=${rawToken}&type=${userType === 'PLATFORM_ADMIN' ? 'platform' : 'tenant'}`,
+        devUrl: resetUrl,
       };
     }
+
+    try {
+      await this.mail.sendPasswordReset(email, userName, resetUrl);
+    } catch { /* silencia erro de email */ }
 
     return { message: 'Se o email existir, um link de redefinição será gerado.' };
   }

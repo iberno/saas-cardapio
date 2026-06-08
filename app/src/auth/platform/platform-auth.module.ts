@@ -6,6 +6,7 @@ import { PasswordResetService } from '../shared/password-reset.service';
 import { TotpService } from '../shared/totp.service';
 import { TokenService } from '../shared/token.service';
 import { AuditModule } from '../../infra/audit/audit.module';
+import { MailModule } from '../../infra/mail/mail.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuditModule } from '../../infra/audit/audit.module';
       }),
     }),
     AuditModule,
+    MailModule,
   ],
   controllers: [PlatformAuthController],
   providers: [PlatformAuthService, PasswordResetService, TotpService, TokenService],

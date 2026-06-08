@@ -5,6 +5,7 @@ import { TenantUserAuthService } from './tenant-user-auth.service';
 import { PasswordResetService } from '../shared/password-reset.service';
 import { TotpService } from '../shared/totp.service';
 import { TokenService } from '../shared/token.service';
+import { MailModule } from '../../infra/mail/mail.module';
 import { AuditModule } from '../../infra/audit/audit.module';
 
 @Module({
@@ -13,6 +14,7 @@ import { AuditModule } from '../../infra/audit/audit.module';
       useFactory: () => ({ secret: process.env.JWT_SECRET, signOptions: { algorithm: 'HS256' } }),
     }),
     AuditModule,
+    MailModule,
   ],
   controllers: [TenantUserAuthController],
   providers: [TenantUserAuthService, PasswordResetService, TotpService, TokenService],

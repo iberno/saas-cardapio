@@ -28,6 +28,13 @@ services:
       JWT_SECRET: troque-por-jwt-seguro-aqui
       COOKIE_DOMAIN_BASE: ohmeupedido.com.br
       TOTP_ENCRYPTION_KEY: troque-por-chave-totp-aqui
+      FRONTEND_URL: https://ohmeupedido.com.br
+      SMTP_HOST: ""
+      SMTP_PORT: 587
+      SMTP_SECURE: "false"
+      SMTP_USER: ""
+      SMTP_PASS: ""
+      SMTP_FROM: ""
       LOG_LEVEL: debug
     depends_on:
       postgres:

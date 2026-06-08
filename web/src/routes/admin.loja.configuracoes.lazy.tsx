@@ -5,7 +5,7 @@ import { useAuth } from '../lib/auth-context'
 import { getSettings, updateSettings, type StoreSettings } from '../services/settings.service'
 import { StoreHoursEditor } from '../components/StoreHoursEditor'
 import { ImageUpload } from '../components/ui/ImageUpload'
-import { Save, MapPin, Phone, Clock, CreditCard, Star, ExternalLink, Image } from 'lucide-react'
+import { Save, MapPin, Phone, Clock, CreditCard, Star, ExternalLink, Image, FileText } from 'lucide-react'
 
 export const Route = createLazyFileRoute('/admin/loja/configuracoes')({
   component: ConfiguracoesPage,
@@ -103,6 +103,13 @@ function ConfiguracoesPage() {
             <ExternalLink size={16} /> Instagram
           </label>
           <input value={instagram} onChange={(e) => setInstagram(e.target.value)} className="input w-full" placeholder="@seudominio" />
+        </div>
+
+        <div>
+          <label className="label font-semibold text-sm flex items-center gap-1">
+            <FileText size={16} /> Sobre a loja
+          </label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="textarea w-full" rows={4} placeholder="Conte um pouco sobre sua loja..." />
         </div>
 
         <div>
