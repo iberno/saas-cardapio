@@ -16,7 +16,13 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     path: '/admin',
     icon: LayoutDashboard,
-    showFor: 'both',
+    showFor: 'platform',
+  },
+  {
+    label: 'Dashboard',
+    path: '/admin/loja',
+    icon: LayoutDashboard,
+    showFor: 'tenant',
   },
   {
     label: 'Lojas',
