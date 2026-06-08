@@ -156,7 +156,7 @@ Login por telefone no modal
 cd app
 npx vitest run test/e2e --no-file-parallelism
 ```
-
+**Deploy Automatizado pelo GitActions**
 ## Licença
 
 Projeto privado.
