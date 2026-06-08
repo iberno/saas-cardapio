@@ -19,19 +19,25 @@ async function main() {
   });
   console.log('PlatformAdmin:', platformAdmin.email);
 
+  const existingTenant = await prisma.tenant.findUnique({ where: { slug: 'elsaboracai' } });
+  const defaultSettings = {
+    hoursText: 'Seg-Sex: 08h-12h e 14h-19h\nSáb: 09h-17h',
+    description: 'Somos uma loja especializada em açaí, feito com qualidade, sabor e muito carinho. Trabalhamos com combinações irresistíveis, ingredientes selecionados e aquele açaí cremoso que conquista no primeiro gole. Atendemos exclusivamente por delivery, levando praticidade e sabor até você.',
+  };
   const tenant = await prisma.tenant.upsert({
     where: { slug: 'elsaboracai' },
-    update: {},
+    update: {
+      settings: existingTenant?.settings
+        ? { ...(existingTenant.settings as Record<string, unknown>), ...defaultSettings }
+        : defaultSettings,
+    },
     create: {
       slug: 'elsaboracai',
       name: 'El Sabor Açaí',
       status: 'ACTIVE',
       contactEmail: 'contato@elsaboracai.com.br',
       contactPhone: '(27) 99738-7694',
-      settings: {
-        hoursText: 'Seg-Sex: 08h-12h e 14h-19h\nSáb: 09h-17h',
-        description: 'Somos uma loja especializada em açaí, feito com qualidade, sabor e muito carinho. Trabalhamos com combinações irresistíveis, ingredientes selecionados e aquele açaí cremoso que conquista no primeiro gole. Atendemos exclusivamente por delivery, levando praticidade e sabor até você.',
-      },
+      settings: defaultSettings,
     },
   });
   console.log('Tenant:', tenant.slug, tenant.id);
